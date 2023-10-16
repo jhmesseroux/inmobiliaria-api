@@ -1,13 +1,10 @@
 const express = require('express')
 const path = require('path')
 const helmet = require('helmet')
-// const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const { globalError } = require('./Generic/errorControllers')
 const morgan = require('morgan')
 const AppError = require('./helpers/AppError')
-// const RubroArt = require('./schemas/rubroArticulo.js')
-// const Articulo = require('./schemas/articulo.js')
 const app = express()
 
 app.use(cors())
@@ -35,14 +32,14 @@ if (process.env.NODE_ENV !== 'production') {
   require('./schemas/contract')
   require('./schemas/contractPerson')
   require('./schemas/contractPrice')
-  
+
   // require('./schemas/rubroArticulo')
   // require('./schemas/user')
   // require('./schemas/parametro')
   // dbConnect
-  //     .sync({ force: true })
-  //     .then((res) => { console.log('DATABASE CONNECTED AND UPDATED!!!') })
-  //     .catch((err) => console.log(err))
+  //   .sync({ force: true })
+  //   .then((res) => { console.log('DATABASE CONNECTED AND UPDATED!!!') })
+  //   .catch((err) => console.log(err))
 }
 
 app.use(require('./routes'))

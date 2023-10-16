@@ -9,51 +9,52 @@ const Zone = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     name: {
       type: DataTypes.STRING(20),
       allowNull: false,
       unique: {
         name: 'name_organization_id_zone_unique',
-        msg: 'Ya existe otra zona con ese nombre.',
+        msg: 'Ya existe otra zona con ese nombre.'
       },
       validate: {
         notNull: {
-          msg: 'La zona no puede ser nulo.',
+          msg: 'La zona no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'La zona no puede ser vacio.',
+          msg: 'La zona no puede ser vacio.'
         },
         len: {
           args: [1, 20],
-          msg: 'La zona debe tener entre 1 y 20 caracteres.',
-        },
-      },
+          msg: 'La zona debe tener entre 1 y 20 caracteres.'
+        }
+      }
     },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
-      unique: {
-        name: 'name_organization_id_zone_unique',
-        msg: 'Ya existe otra zona con ese nombre.',
-      },
+      // unique: {
+      //   name: 'name_organization_id_zone_unique',
+      //   msg: 'Ya existe otra zona con ese nombre.'
+      // },
+      unique: 'name_organization_id_zone_unique',
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.',
+          msg: 'La organización es obligatoria.'
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
-    },
+          msg: 'La organización es obligatoria.'
+        }
+      }
+    }
   },
   {
-    tableName: 'zones',
+    tableName: 'zones'
   }
 )
 
-Zone.belongsTo(Organization, {  foreignKey: { allowNull: false },  onDelete: 'CASCADE'})
+Zone.belongsTo(Organization, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' })
 Organization.hasMany(Zone)
 
 module.exports = Zone

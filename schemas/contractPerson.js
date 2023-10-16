@@ -8,33 +8,32 @@ const ContractPerson = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     role: {
       type: DataTypes.STRING(10),
-      allowNull: false,     
+      allowNull: false,
       validate: {
         notNull: {
-          msg: 'El rol no puede ser nulo.',
+          msg: 'El rol no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'El rol no puede ser vacio.',
+          msg: 'El rol no puede ser vacio.'
         },
         isIn: {
-            args: [['INQUILINO', 'GARANTE']],
-            msg: 'El rol debe ser INQUILINO o GARANTE.',
-            },
+          args: [['INQUILINO', 'GARANTE']],
+          msg: 'El rol debe ser INQUILINO o GARANTE.'
+        },
         len: {
           args: [1, 10],
-          msg: 'El rol debe tener entre 1 y 10 caracteres.',
-        },
-      },
+          msg: 'El rol debe tener entre 1 y 10 caracteres.'
+        }
+      }
     }
   },
   {
-    tableName: 'contractpersons',
+    tableName: 'contractpersons'
   }
 )
-
 
 module.exports = ContractPerson

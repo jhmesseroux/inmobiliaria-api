@@ -24,7 +24,7 @@ const handleSequelizeUniqueConstraintError = (error) => {
 	return new AppError(error.errors.map((e) => e.message).join(',,'), 400)
 }
 
-const handleJsonWebTokenError = () => new AppError(`Token  no valido. Inicia sesión de nuevo.`, 401)
+const handleJsonWebTokenError = () => new AppError('Token  no valido. Inicia sesión de nuevo.', 401)
 const handleJWTExpiredToken = () => new AppError('Su token ha caducado. Vuelva a iniciar sesión, por favor.', 401)
 const handleSequelizeAccessDeniedError = () =>
 	new AppError(
@@ -38,12 +38,12 @@ const sendError = (err, res) => {
 			ok: false,
 			status: err.status,
 			message: err.message.split(',,')[0],
-			errors: err.message.split(',,'),
+			errors: Array.from(new Set(err.message.split(',,'))),
 			error: {
 				...err,
-				message: err.message,
+				message: err.message
 			},
-			stack: err.stack,
+			stack: err.stack
 		})
 	}
 
@@ -53,7 +53,7 @@ const sendError = (err, res) => {
 			status: err.status,
 			message: err.message.split(',,')[0],
 			errors: err.message.split(',,'),
-			code: err.statusCode,
+			code: err.statusCode
 		})
 	}
 
@@ -61,7 +61,7 @@ const sendError = (err, res) => {
 		ok: false,
 		status: 'error',
 		code: 500,
-		message: err.message.split(',,')[0] || '¡¡Algo salió  mal!! Por favor, inténtalo de nuevo.',
+		message: err.message.split(',,')[0] || '¡¡Algo salió  mal!! Por favor, inténtalo de nuevo.'
 	})
 }
 
@@ -70,8 +70,8 @@ exports.globalError = (err, req, res, next) => {
 	err.status = err.status || 'error'
 	let error = Object.assign(err)
 	console.log(error)
-	const errorMessages = error?.errors?.map((err) => err.message);
-    console.error('Validation errors:', errorMessages);
+	const errorMessages = error?.errors?.map((err) => err.message)
+	console.error('Validation errors:', errorMessages)
 	if (error.errors !== undefined) {
 		switch (error.errors[0].message) {
 			case 'contracts__property_id__client_id_start_date_end_date must be unique':
@@ -99,7 +99,7 @@ exports.globalError = (err, req, res, next) => {
 	if (error.name === 'SequelizeValidationError') error = handleSequelizeValidationError(error)
 	if (error.name === 'SequelizeUniqueConstraintError') error = handleSequelizeUniqueConstraintError(error)
 	if (error.name === 'SequelizeForeignKeyConstraintError') error = handleSequelizeForeignKeyConstraintError(error)
-	
+
 	sendError(error, res)
 }
 

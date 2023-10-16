@@ -4,7 +4,7 @@ const {
   create,
   findOne,
   update,
-  destroy,
+  destroy
 } = require('../generic/factoryControllers')
 const Zone = require('../schemas/zone')
 

@@ -11,23 +11,23 @@ const Account = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     username: {
       type: DataTypes.STRING(50),
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El nombre de usuario no puede ser nulo.',
+          msg: 'El nombre de usuario no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'El nombre de usuario no puede ser vacio.',
+          msg: 'El nombre de usuario no puede ser vacio.'
         },
         len: {
           args: [3, 50],
-          msg: 'El nombre de usuario debe tener entre 3 a 50 caracteres.',
-        },
-      },
+          msg: 'El nombre de usuario debe tener entre 3 a 50 caracteres.'
+        }
+      }
     },
     role: {
       allowNull: false,
@@ -36,81 +36,81 @@ const Account = dbConnect.define(
       validate: {
         isIn: {
           args: [['admin', 'superAdmin', 'collaborator']],
-          msg: 'Ese rol no está permitido en el sistema.',
+          msg: 'Ese rol no está permitido en el sistema.'
         },
         notNull: {
-          msg: 'El rol no puede ser nulo.',
+          msg: 'El rol no puede ser nulo.'
         },
         len: {
           args: [4, 12],
-          msg: 'El rol debe tener entre 3 a 12 caracteres.',
-        },
-      },
+          msg: 'El rol debe tener entre 3 a 12 caracteres.'
+        }
+      }
     },
     email: {
       allowNull: false,
       type: DataTypes.STRING(70),
       unique: {
         name: 'email_organization_id_account_unique',
-        msg: 'Ya existe otra cuenta con ese correo.',
+        msg: 'Ya existe otra cuenta con ese correo.'
       },
       validate: {
         isEmail: {
-          msg: 'EL correo no es valido.',
+          msg: 'EL correo no es valido.'
         },
         notNull: {
-          msg: 'El correo no puede ser nulo.',
+          msg: 'El correo no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'El correo no puede ser vacio.',
-        },
-      },
+          msg: 'El correo no puede ser vacio.'
+        }
+      }
     },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       unique: {
         name: 'email_organization_id_account_unique',
-        msg: 'Ya existe otra cuenta con ese correo.',
+        msg: 'Ya existe otra cuenta con ese correo.'
       },
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.',
+          msg: 'La organización es obligatoria.'
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
+          msg: 'La organización es obligatoria.'
+        }
+      }
     },
     password: {
       allowNull: false,
       type: DataTypes.STRING,
       validate: {
         notNull: {
-          msg: 'La contraseña no puede ser nula.',
+          msg: 'La contraseña no puede ser nula.'
         },
         notEmpty: {
-          msg: 'La contraseña no puede ser vacia.',
+          msg: 'La contraseña no puede ser vacia.'
         },
         len: {
           args: [3, 50],
-          msg: 'La contraseña debe tener entre 3 a 50 caracteres.',
-        },
-      },
+          msg: 'La contraseña debe tener entre 3 a 50 caracteres.'
+        }
+      }
     },
     avatar: DataTypes.STRING(200),
     passwordChangedAt: DataTypes.DATE,
     passwordResetToken: DataTypes.STRING,
-    passwordResetExpires: DataTypes.DATE,
+    passwordResetExpires: DataTypes.DATE
   },
   {
-    tableName: 'accounts',
+    tableName: 'accounts'
   }
 )
 
 Account.belongsTo(Organization, {
   foreignKey: { allowNull: false },
-  onDelete: 'CASCADE',
+  onDelete: 'CASCADE'
 })
 Organization.hasMany(Account)
 
