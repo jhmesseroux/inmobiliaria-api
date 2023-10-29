@@ -9,7 +9,7 @@ const Parameter = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     key: {
       type: DataTypes.STRING(20),
@@ -19,20 +19,20 @@ const Parameter = dbConnect.define(
       },
       unique: {
         name: 'key_organization_id_parameter_unique',
-        msg: 'Ya existe un registro con esa clave.',
+        msg: 'Ya existe un registro con esa clave.'
       },
       validate: {
         notNull: {
-          msg: 'La clave del parametro no puede ser nula.',
+          msg: 'La clave del parametro no puede ser nula.'
         },
         notEmpty: {
-          msg: 'La clave del parametro no puede ser vacia.',
+          msg: 'La clave del parametro no puede ser vacia.'
         },
         len: {
           args: [3, 20],
-          msg: 'La clave del parametro debe tener entre 3 y 20 caracteres.',
-        },
-      },
+          msg: 'La clave del parametro debe tener entre 3 y 20 caracteres.'
+        }
+      }
     },
     value: {
       type: DataTypes.STRING(50),
@@ -42,39 +42,39 @@ const Parameter = dbConnect.define(
       },
       validate: {
         notNull: {
-          msg: 'El valor del parametro no puede ser nulo.',
+          msg: 'El valor del parametro no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'El valor del parametro no puede ser vacio.',
-        },
-      },
+          msg: 'El valor del parametro no puede ser vacio.'
+        }
+      }
     },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       unique: {
         name: 'key_organization_id_parameter_unique',
-        msg: 'Ya existe un registro con esa clave.',
+        msg: 'Ya existe un registro con esa clave.'
       },
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.',
+          msg: 'La organización es obligatoria.'
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
+          msg: 'La organización es obligatoria.'
+        }
+      }
     },
-    description: DataTypes.STRING(100),
+    description: DataTypes.STRING(100)
   },
   {
-    tableName: 'parameters',
+    tableName: 'parameters'
   }
 )
 
 Parameter.belongsTo(Organization, {
   foreignKey: { allowNull: false },
-  onDelete: 'CASCADE',
+  onDelete: 'CASCADE'
 })
 Organization.hasMany(Parameter)
 

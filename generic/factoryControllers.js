@@ -210,7 +210,7 @@ exports.findOne = (Model, opts = null) =>
 exports.create = (Model, allowedFileds) =>
   catchAsync(async (req, res) => {
     console.log(req.user.OrganizationId)
-    req.body.OrganizationId = req.user.OrganizationId
+    req.body.OrganizationId = req.body.OrganizationId || req.user.OrganizationId
     const insertedFileds = allowedFileds
       ? filterFields(req.body, allowedFileds)
       : req.body

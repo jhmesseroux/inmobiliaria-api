@@ -8,13 +8,11 @@ const auth = require('../controller/authController')
 // router.post('/forgot-password', ctrl.forgotPassword)
 // router.patch('/reset-password/:token', ctrl.resetPassword)
 
-// router.use(validador.protect)
+router.use(auth.protect, auth.restrictTo('admin'))
 
 router.get('/', ctrl.GetAll)
-//Get by id
 // router.get('/:id', ctrl.GetById)
 
-//Create
 // router.post('/', ctrl.SignUp);
 
 router.delete('/:id', ctrl.Destroy)

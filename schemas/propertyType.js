@@ -9,18 +9,18 @@ const PropertyType = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     description: {
       type: DataTypes.STRING(50),
       unique: {
         name: 'desc_organization_id_ptyType_unique',
-        msg: 'Ya existe una descripción con esas caracteristica.',
+        msg: 'Ya existe un tipo de propiedad con esas caracteristica.'
       },
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'La descripción no puede ser nula.',
+          msg: 'La descripción no puede ser nula.'
         },
         notEmpty: {
           msg: 'La descripción no puede ser vacia.'
@@ -36,25 +36,26 @@ const PropertyType = dbConnect.define(
       type: DataTypes.BIGINT,
       unique: {
         name: 'desc_organization_id_ptyType_unique',
-        msg: 'Ya existe una descripción con esas caracteristicas.',      },
+        msg: 'Ya existe un tipo de propiedad con esas caracteristicas.'
+      },
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.',
+          msg: 'La organización es obligatoria.'
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
-    },
+          msg: 'La organización es obligatoria.'
+        }
+      }
+    }
   },
   {
-    tableName: 'propertytypes',
+    tableName: 'propertytypes'
   }
 )
 
 PropertyType.belongsTo(Organization, {
   foreignKey: { allowNull: false },
-  onDelete: 'CASCADE',
+  onDelete: 'CASCADE'
 })
 Organization.hasMany(PropertyType)
 
