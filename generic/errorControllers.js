@@ -69,7 +69,7 @@ exports.globalError = (err, req, res, next) => {
 	err.statusCode = err.statusCode || 500
 	err.status = err.status || 'error'
 	let error = Object.assign(err)
-	console.log(error)
+	// console.log(error)
 	const errorMessages = error?.errors?.map((err) => err.message)
 	console.error('Validation errors:', errorMessages)
 	if (error.errors !== undefined) {

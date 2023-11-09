@@ -1,5 +1,5 @@
 const { catchAsync } = require('../helpers/catchAsync')
-const { Op } = require('sequelize')
+const filterQueryParams = require('../helpers/filterqueryParams')
 
 const filterFields = (obj, allowedFields) => {
   const newObj = {}
@@ -11,103 +11,15 @@ const filterFields = (obj, allowedFields) => {
 
 exports.all = (Model, opts = null) =>
   catchAsync(async (req, res) => {
-    if (opts && req.query.include === undefined) {
-      var { include } = opts
-    }
-    const queryFiltered = {
-      ...req.query
-    }
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
+    const queryFiltered = { ...req.query }
     const excludeFields = ['page', 'sort', 'limit', 'fields', 'include']
     excludeFields.forEach((el) => delete queryFiltered[el])
-    const options = {
-      ...queryFiltered
-    }
-
-    Object.keys(queryFiltered).map((k) => {
-      if (queryFiltered[k].toString().split(':').length > 1) {
-        const val = queryFiltered[k].toString().split(':')
-        switch (val[1]) {
-          case 'like':
-            options[`${k}`] = {
-              [Op.substring]: val[0]
-            }
-            break
-          case 'eq':
-            options[`${k}`] = {
-              [eq.eq]: val[0]
-            }
-            break
-          case 'ne':
-            options[`${k}`] = {
-              [Op.ne]: val[0]
-            }
-            break
-          case 'gt':
-            options[`${k}`] = {
-              [Op.gt]: Number(val[0])
-            }
-            break
-          case 'gte':
-            options[`${k}`] = {
-              [Op.gte]: Number(val[0])
-            }
-            break
-          case 'lt':
-            options[`${k}`] = {
-              [Op.lt]: Number(val[0])
-            }
-            break
-          case 'lte':
-            options[`${k}`] = {
-              [Op.lte]: Number(val[0])
-            }
-            break
-          case 'between':
-            options[`${k}`] = {
-              [Op.between]: val[0].split(',').map((i) => Number(i))
-            }
-            break
-          case 'or':
-            options[`${k}`] = {
-              [Op.or]: val[0]
-                .split(',')
-                .map((i) => (typeof i === 'number' ? Number(i) : i))
-            }
-            break
-          case 'and':
-            options[`${k}`] = {
-              [Op.and]: val[0]
-                .split(',')
-                .map((i) => (typeof i === 'number' ? Number(i) : i))
-            }
-            break
-          case 'notBetween':
-            options[`${k}`] = {
-              [Op.notBetween]: val[0].split(',').map((i) => Number(i))
-            }
-            break
-          case 'in':
-            options[`${k}`] = {
-              [Op.in]: val[0]
-                .split(',')
-                .map((i) => (typeof i === 'number' ? Number(i) : i))
-            }
-            break
-          case 'notIn':
-            options[`${k}`] = {
-              [Op.notIn]: val[0]
-                .split(',')
-                .map((i) => (typeof i === 'number' ? Number(i) : i))
-            }
-            break
-          default:
-            break
-        }
-      }
-    })
 
     const docs = await Model.findAll({
-      where: options,
+      where: filterQueryParams(queryFiltered),
       include,
       attributes: req.query.fields
         ? req.query.fields
@@ -116,7 +28,7 @@ exports.all = (Model, opts = null) =>
           .map((el) => (el.includes(':') ? el.split(':') : el))
         : '',
       order:
-        req.query.sort !== undefined
+        req.query.sort
           ? req.query.sort
             .toString()
             .split(',')
@@ -124,35 +36,31 @@ exports.all = (Model, opts = null) =>
           : [['id', 'desc']]
     })
     return res.json({
-      results: docs.length,
-      code: 200,
       status: 'success',
       ok: true,
+      code: 200,
+      results: docs.length,
       data: docs
     })
   })
 
-exports.paginate = (Model) =>
+exports.paginate = (Model, opts = null) =>
   catchAsync(async (req, res, next) => {
-    if (!req.query.limit || !req.query.page) {
-      return next(
-        new Error(
-          'El parametro limit y/o page es obligatorio para usar este metodo!'
-        )
-      )
-    }
+    if (!req.query.limit || !req.query.page) { return next(new Error('El parametro limit y/o page es obligatorio para usar este metodo!')) }
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
+    const queryFiltered = { ...req.query }
 
-    const queryFiltered = {
-      ...req.query
-    }
-
-    const excludeFields = ['page', 'sort', 'limit', 'fields']
+    const excludeFields = ['page', 'sort', 'limit', 'fields', 'include']
     excludeFields.forEach((el) => delete queryFiltered[el])
+
     const page = parseInt(req.query.page) * 1 || 1
     const limit = parseInt(req.query.limit) * 1 || 50
     const offset = (page - 1) * limit
     const docs = await Model.findAll({
-      where: queryFiltered,
+      where: filterQueryParams(queryFiltered),
+      include,
       limit,
       offset,
       attributes: req.query.fields
@@ -162,7 +70,7 @@ exports.paginate = (Model) =>
           .map((el) => (el.includes(':') ? el.split(':') : el))
         : '',
       order:
-        req.query.sort !== undefined
+        req.query.sort
           ? req.query.sort
             .toString()
             .split(',')
@@ -183,9 +91,9 @@ exports.paginate = (Model) =>
 
 exports.findOne = (Model, opts = null) =>
   catchAsync(async (req, res, next) => {
-    if (opts) {
-      var { include } = opts
-    }
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
     const doc = await Model.findOne({
       where: {
         id: req.params.id
@@ -209,7 +117,7 @@ exports.findOne = (Model, opts = null) =>
 
 exports.create = (Model, allowedFileds) =>
   catchAsync(async (req, res) => {
-    console.log(req.user.OrganizationId)
+    // console.log(req.user.OrganizationId)
     req.body.OrganizationId = req.body.OrganizationId || req.user.OrganizationId
     const insertedFileds = allowedFileds
       ? filterFields(req.body, allowedFileds)

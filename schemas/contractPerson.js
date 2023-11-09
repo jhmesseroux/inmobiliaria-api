@@ -4,11 +4,35 @@ const { dbConnect } = require('../db/index')
 const ContractPerson = dbConnect.define(
   'ContractPerson',
   {
-    id: {
-      primaryKey: true,
+    // id: {
+    //   primaryKey: true,
+    //   allowNull: false,
+    //   type: DataTypes.BIGINT,
+    //   autoIncrement: true
+    // },
+    ContractId: {
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true
+      validate: {
+        notNull: {
+          msg: 'El contrato es obligatorio'
+        },
+        notEmpty: {
+          msg: 'El contrato es obligatorio'
+        }
+      }
+    },
+    PersonId: {
+      allowNull: false,
+      type: DataTypes.BIGINT,
+      validate: {
+        notNull: {
+          msg: 'El dueño es obligatorio'
+        },
+        notEmpty: {
+          msg: 'El dueño es obligatorio'
+        }
+      }
     },
     role: {
       type: DataTypes.STRING(10),
@@ -32,7 +56,14 @@ const ContractPerson = dbConnect.define(
     }
   },
   {
-    tableName: 'contractpersons'
+    tableName: 'contractpersons',
+    indexes: [
+      {
+        unique: true,
+        fields: ['PersonId', 'ContractId', 'role'],
+        name: 'person_contract_role_unique'
+      }
+    ]
   }
 )
 

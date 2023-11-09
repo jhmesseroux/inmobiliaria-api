@@ -1,4 +1,4 @@
-var router = require('express').Router()
+const router = require('express').Router()
 // const ctrlJobs = require("../controller/jobs.controller");
 const VERSION = '/api/v1'
 router.use(`${VERSION}/organizations`, require('./organizationRoutes'))
@@ -10,8 +10,8 @@ router.use(`${VERSION}/propertytypes`, require('./propertyType.router'))
 router.use(`${VERSION}/persons`, require('./person.router'))
 router.use(`${VERSION}/properties`, require('./property.router'))
 router.use(`${VERSION}/auth`, require('./auth.router'))
+router.use(`${VERSION}/contracts`, require('./contract.router'))
 
-// router.use(`${VERSION}/contracts', require('./contract.router'))
 // router.use(`${VERSION}/eventualities', require('./eventuality.router'))
 // router.use(`${VERSION}/price-historial', require('./historyPrice.router'))
 // router.use(`${VERSION}/assurances', require('./assurance.router'))

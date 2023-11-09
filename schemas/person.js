@@ -9,20 +9,20 @@ const Person = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     fullName: {
       type: DataTypes.STRING(50),
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El nombre completo es obligatorio',
+          msg: 'El nombre completo es obligatorio'
         },
         notEmpty: {
-          msg: 'El nombre completo es obligatorio',
-        },
-      },
-    },    
+          msg: 'El nombre completo es obligatorio'
+        }
+      }
+    },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
@@ -32,12 +32,12 @@ const Person = dbConnect.define(
       // },
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.',
+          msg: 'La organización es obligatoria.'
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
+          msg: 'La organización es obligatoria.'
+        }
+      }
     },
     phone: {
       type: DataTypes.STRING(20),
@@ -48,13 +48,13 @@ const Person = dbConnect.define(
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El telefóno es obligatorio',
+          msg: 'El telefóno es obligatorio'
         },
         notEmpty: {
-          msg: 'El telefóno es obligatorio',
-        },
-      },
-    }, 
+          msg: 'El telefóno es obligatorio'
+        }
+      }
+    },
     email: {
       type: DataTypes.STRING(100),
       // unique: {
@@ -64,66 +64,66 @@ const Person = dbConnect.define(
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El email es obligatorio',
+          msg: 'El email es obligatorio'
         },
         notEmpty: {
-          msg: 'El email es obligatorio',
-        },
-      },
+          msg: 'El email es obligatorio'
+        }
+      }
     },
     docType: {
       type: DataTypes.STRING(9),
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El tipo de documento no puede ser nulo.',
+          msg: 'El tipo de documento no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'El tipo de documento no puede ser vacio.',
+          msg: 'El tipo de documento no puede ser vacio.'
         },
         isIn: {
           args: [['DNI', 'CUIT', 'CUIL', 'PASAPORTE']],
-          msg: 'El tipo de documento debe ser DNI, CUIT ,CUIL o PASAPORTE.',
-        },
-      },
+          msg: 'El tipo de documento debe ser DNI, CUIT ,CUIL o PASAPORTE.'
+        }
+      }
     },
     docNumber: {
       type: DataTypes.STRING(15),
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El número del documento no puede ser nulo.',
+          msg: 'El número del documento no puede ser nulo.'
         },
         notEmpty: {
-          msg: 'El número del documento no puede ser vacio.',
+          msg: 'El número del documento no puede ser vacio.'
         },
         len: {
           args: [7, 15],
-          msg: 'El número del documento debe tener entre 7 y 15 caracteres.',
-        },
-      },
+          msg: 'El número del documento debe tener entre 7 y 15 caracteres.'
+        }
+      }
     },
     address: {
       type: DataTypes.STRING(100),
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'La dirección es obligatoria',
+          msg: 'La dirección es obligatoria'
         },
         notEmpty: {
-          msg: 'La dirección es obligatoria',
-        },
-      },
+          msg: 'La dirección es obligatoria'
+        }
+      }
     },
     isOwner: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
-      defaultValue: false,      
+      defaultValue: false
     },
     // commision:  DataTypes.FLOAT,
     province: DataTypes.STRING(70),
     city: DataTypes.STRING(70),
-    codePostal: DataTypes.STRING(10),
+    codePostal: DataTypes.STRING(10)
     // obs: DataTypes.STRING,
   },
   {
@@ -131,26 +131,26 @@ const Person = dbConnect.define(
     indexes: [
       {
         unique: true,
-        fields: ["docType", "docNumber",'OrganizationId'],
-        name: "docType_docNumber_OrganizationId_unique"
+        fields: ['docType', 'docNumber', 'OrganizationId'],
+        name: 'docType_docNumber_OrganizationId_unique'
       },
       {
         unique: true,
-        fields: ["email",'OrganizationId'],
-        name: "email_organization_unique"
+        fields: ['email', 'OrganizationId'],
+        name: 'email_organization_unique'
       },
       {
         unique: true,
-        fields: ["phone", 'OrganizationId'],
-        name:"phone_organization_unique"
-      },
-    ],
+        fields: ['phone', 'OrganizationId'],
+        name: 'phone_organization_unique'
+      }
+    ]
   }
 )
 
 Person.belongsTo(Organization, {
   foreignKey: { allowNull: false },
-  onDelete: 'CASCADE',
+  onDelete: 'CASCADE'
 })
 Organization.hasMany(Person)
 

@@ -14,53 +14,53 @@ const Contract = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     PropertyId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       validate: {
         notNull: {
-          msg: 'El propietario es obligatorio',
+          msg: 'El propietario es obligatorio'
         },
         notEmpty: {
-          msg: 'El propietario es obligatorio',
-        },
-      },
-    },   
+          msg: 'El propietario es obligatorio'
+        }
+      }
+    },
     startDate: {
       allowNull: false,
       type: DataTypes.DATEONLY,
       validate: {
         notNull: {
-          msg: 'La fecha del comienzo es obligatoria',
+          msg: 'La fecha del comienzo es obligatoria'
         },
         notEmpty: {
-          msg: 'La fecha del comienzo es obligatoria',
-        },
-      },
+          msg: 'La fecha del comienzo es obligatoria'
+        }
+      }
     },
     endDate: {
       allowNull: false,
       type: DataTypes.DATEONLY,
       validate: {
         notNull: {
-          msg: 'La fecha fin es obligatoria',
+          msg: 'La fecha fin es obligatoria'
         },
         notEmpty: {
-          msg: 'La fecha fin es obligatoria',
+          msg: 'La fecha fin es obligatoria'
         },
         isGreaterThanStartDate(value) {
           if (value <= this.startDate) {
             throw new Error('La fecha fin del contrato debe ser mayor que la fecha de inicio.')
           }
-        },
-      },
+        }
+      }
     },
     admFeesPorc: {
       allowNull: false,
       type: DataTypes.FLOAT,
-      defaultValue: 2,
+      defaultValue: 2
       // gastos de administración | gestión | comisión
     },
     // currency: {
@@ -80,51 +80,65 @@ const Contract = dbConnect.define(
       validate: {
         isIn: {
           args: [CONTRACT_STATES],
-          msg: 'El estado ingresado no está permitido.',
-        },
-      },
+          msg: 'El estado ingresado no está permitido.'
+        }
+      }
     },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
-      unique: {
-        name: 'name_organization_id_zone_unique',
-        msg: 'Ya existe otra zona con ese nombre.',
-      },
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.',
+          msg: 'La organización es obligatoria.'
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
+          msg: 'La organización es obligatoria.'
+        }
+      }
     },
     booking: DataTypes.FLOAT, // reserva | seña
     deposit: DataTypes.FLOAT,
     description: DataTypes.STRING,
-    motive: DataTypes.STRING // motivo de la finalización del contrato | motivo de la cancelación del contrato   
+    motive: DataTypes.STRING // motivo de la finalización del contrato | motivo de la cancelación del contrato
   },
   {
     tableName: 'contracts',
+    indexes: [
+      {
+        unique: true,
+        fields: ['OrganizationId', 'PropertyId', 'startDate', 'state'],
+        name: 'property_organization_state_unique'
+      }
+    ]
   }
 )
 
-Contract.belongsTo(Organization, {  foreignKey: { allowNull: false },  onDelete: 'CASCADE'})
+Contract.belongsTo(Organization, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' })
 Organization.hasMany(Contract)
 
-ContractPrice.belongsTo(Contract, {  foreignKey: { allowNull: false },  onDelete: 'CASCADE'})
+ContractPrice.belongsTo(Contract, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' })
 Contract.hasMany(ContractPrice)
 
-Contract.belongsTo(Property, {  foreignKey: { allowNull: false },  onDelete: 'CASCADE'})
+Contract.belongsTo(Property, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' })
 Property.hasMany(Contract)
 
-Contract.belongsToMany(Person, { through: ContractPerson })
-Person.belongsToMany(Contract, { through: ContractPerson })
 Contract.hasMany(ContractPerson)
 ContractPerson.belongsTo(Contract)
+
+// Contract.belongsToMany(Person, { through: ContractPerson })
+// Person.belongsToMany(Contract, { through: ContractPerson, uniqueKey: false })
+
+// Setup a One-to-Many relationship between User and Grant
+// User.hasMany(Grant);
+// Grant.belongsTo(User);
+
+// Also setup a One-to-Many relationship between Profile and Grant
+// Profile.hasMany(Grant);
+// Grant.belongsTo(Profile);
+
+// Contract.hasMany(ContractPerson)
+// ContractPerson.belongsTo(Contract)
 Person.hasMany(ContractPerson)
 ContractPerson.belongsTo(Person)
-
 
 module.exports = Contract
