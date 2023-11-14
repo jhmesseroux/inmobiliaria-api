@@ -14,19 +14,19 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true,
 				allowNull: false,
 				type: DataTypes.BIGINT,
-				autoIncrement: true,
+				autoIncrement: true
 			},
 			PropertyId: {
 				allowNull: false,
 				type: DataTypes.BIGINT,
 				validate: {
 					notNull: {
-						msg: 'La propiedad es obligatoria.',
+						msg: 'La propiedad es obligatoria.'
 					},
 					notEmpty: {
-						msg: 'La propiedad es obligatoria.',
-					},
-				},
+						msg: 'La propiedad es obligatoria.'
+					}
+				}
 			},
 			paymentId: DataTypes.BIGINT,
 			// ContractId: {
@@ -46,69 +46,69 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.FLOAT,
 				validate: {
 					notNull: {
-						msg: 'El monto del cliente es obligatorio.',
+						msg: 'El monto del cliente es obligatorio.'
 					},
 					notEmpty: {
-						msg: 'El monto del cliente es obligatorio.',
-					},
-				},
+						msg: 'El monto del cliente es obligatorio.'
+					}
+				}
 			},
 			ownerAmount: {
 				allowNull: false,
 				type: DataTypes.FLOAT,
 				validate: {
 					notNull: {
-						msg: 'El monto del dueño es obligatorio.',
+						msg: 'El monto del dueño es obligatorio.'
 					},
 					notEmpty: {
-						msg: 'El monto del dueño es obligatorio.',
-					},
-				},
+						msg: 'El monto del dueño es obligatorio.'
+					}
+				}
 			},
 			clientPaid: {
 				allowNull: false,
 				type: DataTypes.BOOLEAN,
-				defaultValue: false,
+				defaultValue: false
 			},
 			isReverted: {
 				allowNull: false,
 				type: DataTypes.BOOLEAN,
-				defaultValue: false,
+				defaultValue: false
 			},
 			ownerPaid: {
 				allowNull: false,
 				type: DataTypes.BOOLEAN,
-				defaultValue: false,
+				defaultValue: false
 			},
 			description: {
 				allowNull: false,
 				type: DataTypes.STRING,
 				validate: {
 					notNull: {
-						msg: 'La descripción es obligatoria.',
+						msg: 'La descripción es obligatoria.'
 					},
 					notEmpty: {
-						msg: 'La descripción es obligatoria.',
-					},
-				},
+						msg: 'La descripción es obligatoria.'
+					}
+				}
 			},
 			expiredDate: {
 				allowNull: false,
 				type: DataTypes.DATEONLY,
 				validate: {
 					notNull: {
-						msg: 'La fecha de vencimiento es obligatoria.',
+						msg: 'La fecha de vencimiento es obligatoria.'
 					},
 					notEmpty: {
-						msg: 'La fecha de vencimiento es obligatoria.',
-					},
-				},
-			},
+						msg: 'La fecha de vencimiento es obligatoria.'
+					}
+				}
+			}
 		},
 		{
 			sequelize,
 			modelName: 'Eventuality',
-			tableName: 'eventualities',
+			tableName: 'eventualities'
 			// paranoid: true,
 		}
 	)

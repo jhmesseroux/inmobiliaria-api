@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const ctrl = require('../controller/contract.controller')
-const validador = require('../helpers/validador')
+const auth = require('../controller/authController')
 
-router.use(validador.protect)
+router.use(auth.protect)
 
 router.post('/', ctrl.Post)
 router.get('/', ctrl.GetAll)

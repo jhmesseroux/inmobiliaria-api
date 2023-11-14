@@ -23,29 +23,32 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'))
   const { dbConnect } = require('./db/index')
-  require('./schemas/organization')
-  require('./schemas/account')
-  require('./schemas/zone')
-  require('./schemas/parameter')
-  require('./schemas/person')
-  require('./schemas/property')
-  require('./schemas/contract')
-  require('./schemas/contractPerson')
-  require('./schemas/contractPrice')
+  // require('./schemas/organization')
+  // require('./schemas/account')
+  // require('./schemas/zone')
+  // require('./schemas/parameter')
+  // require('./schemas/person')
+  // require('./schemas/property')
+  // require('./schemas/contract')
+  // require('./schemas/contractPerson')
+  // require('./schemas/contractPrice')
+  // require('./schemas/debt')
+  // require('./schemas/eventuality')
+  // require('./schemas/expense')
 
   // require('./schemas/rubroArticulo')
   // require('./schemas/user')
   // require('./schemas/parametro')
   // dbConnect
-  //   .sync({ force: true })
-  //   .then((res) => { console.log('DATABASE CONNECTED AND UPDATED!!!') })
+  //   .sync({ alter: true })
+  //   .then((res) => {
+  //     console.log('DATABASE CONNECTED AND UPDATED!!!')
+  //   })
   //   .catch((err) => console.log(err))
 }
 
 app.use(require('./routes'))
-app.all('*', (req, res, next) =>
-  next(new AppError(`No existe esta ruta ${req.originalUrl}.`, 400))
-)
+app.all('*', (req, res, next) => next(new AppError(`No existe esta ruta ${req.originalUrl}.`, 400)))
 
 app.use(globalError)
 

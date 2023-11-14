@@ -1,18 +1,19 @@
 const router = require('express').Router()
 const ctrl = require('../controller/zone.controller')
-const validador = require('../helpers/validador')
+const auth = require('../controller/authController')
 
-router.use(validador.protect)
+router.use(auth.protect)
+
 router.get('/', ctrl.GetAll)
-//Get by id
+router.get('/paginate', ctrl.Paginate)
 router.get('/:id', ctrl.GetById)
 
-//Create
 router.post('/', ctrl.Create)
 
-//Update
 router.put('/:id', ctrl.Put)
+router.put('/:id/restore', ctrl.Restore)
 
-//Delete
 router.delete('/:id', ctrl.Destroy)
+router.delete('/delete/multiple', ctrl.DestroyMultiple)
+
 module.exports = router

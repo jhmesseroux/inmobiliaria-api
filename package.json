@@ -33,9 +33,5 @@
     "pug": "^3.0.2",
     "sequelize": "^6.28.0",
     "uuidv4": "^6.2.13"
-  },
-  "eslintConfig": {
-    "extends": "./node_modules/standard/eslintrc.json"
-  }
-  
+  }  
 }
