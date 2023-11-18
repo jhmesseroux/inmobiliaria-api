@@ -71,10 +71,21 @@ exports.paginate = (Model, opts = null) =>
     else include = undefined
     const queryFiltered = { ...req.query }
 
+    console.log(queryFiltered)
+
     const excludeFields = ['page', 'sort', 'limit', 'fields', 'include', 'paranoid']
     excludeFields.forEach((el) => delete queryFiltered[el])
 
-    console.log(include)
+    console.log(queryFiltered)
+
+    // validate if some value is 'null' and replace with null
+    // Object.keys(queryFiltered).forEach((el) => {
+    //   if (queryFiltered[el] === 'null') queryFiltered[el] = null
+    // })
+
+    console.log(queryFiltered)
+
+    // console.log(include)
 
     const page = parseInt(req.query.page) * 1 || 1
     const limit = parseInt(req.query.limit) * 1 || 50

@@ -4,7 +4,10 @@ const { Op } = require('sequelize')
 
 const filterQueryParams = (queryFiltered) => {
   const options = { ...queryFiltered }
+  console.log('entroooooooooooooooooooooooo')
+  console.log(options)
   Object.keys(queryFiltered).forEach((k) => {
+    console.log('ahiiiiiiiiiiiiiiiiiiiiiiiiii')
     if (queryFiltered[k].toString().split(':').length > 1) {
       const val = queryFiltered[k].toString().split(':')
       switch (val[1]) {
@@ -20,7 +23,7 @@ const filterQueryParams = (queryFiltered) => {
           break
         case 'ne':
           options[`${k}`] = {
-            [Op.ne]: val[0],
+            [Op.ne]: val[0] === 'null' ? null : val[0],
           }
           break
         case 'gt':
@@ -76,8 +79,16 @@ const filterQueryParams = (queryFiltered) => {
         default:
           break
       }
+    } else {
+      options[`${k}`] = {
+        [Op.eq]: queryFiltered[k] === 'null' ? null : queryFiltered[k],
+      }
     }
   })
+
+  console.log(';en llegoooooooooooooooooooooooooooooooo')
+
+  console.log('LAST ::', options)
   return options
 }
 

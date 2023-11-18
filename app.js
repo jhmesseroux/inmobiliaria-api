@@ -35,6 +35,7 @@ if (process.env.NODE_ENV !== 'production') {
   // require('./schemas/debt')
   // require('./schemas/eventuality')
   // require('./schemas/expense')
+  // require('./schemas/payment')
 
   // require('./schemas/rubroArticulo')
   // require('./schemas/user')
