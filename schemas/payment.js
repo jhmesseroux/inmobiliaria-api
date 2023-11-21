@@ -111,24 +111,29 @@ const Payment = dbConnect.define(
     expenseDetails: {
       type: DataTypes.TEXT('long'),
       get: function () {
-        if (!this.getDataValue('expenseDetails')) return null
+        if (!this.getDataValue('expenseDetails')) return []
         return JSON.parse(this.getDataValue('expenseDetails'))
       },
       set: function (value) {
         return this.setDataValue('expenseDetails', JSON.stringify(value || ''))
       },
     },
-
+    date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: new Date(),
+    },
     eventualityDetails: {
       type: DataTypes.TEXT('long'),
       get: function () {
-        if (!this.getDataValue('PaymentDetails')) return null
-        return JSON.parse(this.getDataValue('PaymentDetails'))
+        if (!this.getDataValue('eventualityDetails')) return []
+        return JSON.parse(this.getDataValue('eventualityDetails'))
       },
       set: function (value) {
-        return this.setDataValue('PaymentDetails', JSON.stringify(value || ''))
+        return this.setDataValue('eventualityDetails', JSON.stringify(value || ''))
       },
     },
+    // createdAt: DataTypes.DATE,
   },
   {
     tableName: 'payments',

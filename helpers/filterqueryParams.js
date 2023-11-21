@@ -28,52 +28,52 @@ const filterQueryParams = (queryFiltered) => {
           break
         case 'gt':
           options[`${k}`] = {
-            [Op.gt]: Number(val[0]),
+            [Op.gt]: val[0],
           }
           break
         case 'gte':
           options[`${k}`] = {
-            [Op.gte]: Number(val[0]),
+            [Op.gte]: val[0],
           }
           break
         case 'lt':
           options[`${k}`] = {
-            [Op.lt]: Number(val[0]),
+            [Op.lt]: val[0],
           }
           break
         case 'lte':
           options[`${k}`] = {
-            [Op.lte]: Number(val[0]),
+            [Op.lte]: val[0],
           }
           break
         case 'between':
           options[`${k}`] = {
-            [Op.between]: val[0].split(',').map((i) => Number(i)),
+            [Op.between]: val[0].split(',').map((i) => i),
           }
           break
         case 'or':
           options[`${k}`] = {
-            [Op.or]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)),
+            [Op.or]: val[0].split(',').map((i) => (typeof i === 'number' ? i : i)),
           }
           break
         case 'and':
           options[`${k}`] = {
-            [Op.and]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)),
+            [Op.and]: val[0].split(',').map((i) => (typeof i === 'number' ? i : i)),
           }
           break
         case 'notBetween':
           options[`${k}`] = {
-            [Op.notBetween]: val[0].split(',').map((i) => Number(i)),
+            [Op.notBetween]: val[0].split(',').map((i) => i),
           }
           break
         case 'in':
           options[`${k}`] = {
-            [Op.in]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)),
+            [Op.in]: val[0].split(',').map((i) => (typeof i === 'number' ? i : i)),
           }
           break
         case 'notIn':
           options[`${k}`] = {
-            [Op.notIn]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)),
+            [Op.notIn]: val[0].split(',').map((i) => (typeof i === 'number' ? i : i)),
           }
           break
         default:

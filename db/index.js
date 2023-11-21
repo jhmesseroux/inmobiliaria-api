@@ -8,8 +8,8 @@ exports.dbConnect = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, 
     collate: 'utf8_general_ci',
     timestamps: true,
   },
-  logging: false,
-  // logging: process.env.NODE_ENV !== 'production',
+  // logging: false,
+  logging: process.env.NODE_ENV !== 'production',
 })
 
 // TODO: user enviroment variable to set the database name and password for production

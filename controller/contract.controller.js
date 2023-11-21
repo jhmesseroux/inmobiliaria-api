@@ -8,21 +8,21 @@ const Person = require('../schemas/person')
 const { dbConnect } = require('../db')
 const ContractPerson = require('../schemas/contractPerson')
 const ContractPrice = require('../schemas/contractPrice')
-const { CONTRACT_ROLES } = require('../constants')
+const { CONTRACT_ROLES, CONTRACT_STATES } = require('../constants')
 
 exports.GetAll = all(Contract, {
   include: [
     { model: Property, include: { model: Person } },
     { model: ContractPerson, include: { model: Person } },
-    { model: ContractPrice }
-  ]
+    { model: ContractPrice },
+  ],
 })
 exports.Paginate = paginate(Contract, {
   include: [
     { model: Property, include: { model: Person } },
     { model: ContractPerson, include: { model: Person } },
-    { model: ContractPrice }
-  ]
+    { model: ContractPrice },
+  ],
 })
 
 exports.Post = catchAsync(async (req, res, next) => {
@@ -38,10 +38,7 @@ exports.Post = catchAsync(async (req, res, next) => {
     const cont = await Contract.create(req.body, { transaction: t })
 
     // update property state
-    const updPro = await Property.update(
-      { state: 'Ocupado' },
-      { where: { id: PropertyId }, transaction: t }
-    )
+    const updPro = await Property.update({ state: 'Ocupado' }, { where: { id: PropertyId }, transaction: t })
 
     if (updPro[0] <= 0) {
       await t.rollback()
@@ -49,27 +46,36 @@ exports.Post = catchAsync(async (req, res, next) => {
     }
 
     // add  price
-    await ContractPrice.create({
-      ContractId: cont.id,
-      amount: req.body.amount,
-      percent: 0
-    }, { transaction: t })
+    await ContractPrice.create(
+      {
+        ContractId: cont.id,
+        amount: req.body.amount,
+        percent: 0,
+      },
+      { transaction: t }
+    )
 
     // add inquilino
-    await ContractPerson.create({
-      ContractId: cont.id,
-      PersonId: req.body.PersonId,
-      role: CONTRACT_ROLES[0]
-    }, { transaction: t })
+    await ContractPerson.create(
+      {
+        ContractId: cont.id,
+        PersonId: req.body.PersonId,
+        role: CONTRACT_ROLES[0],
+      },
+      { transaction: t }
+    )
 
     // add garantes
     if (req.body.assurances && req.body.assurances.length > 0) {
-      for (let j = 0;j < req.body.assurances.length;j++) {
-        await ContractPerson.create({
-          ContractId: cont.id,
-          PersonId: req.body.assurances[j].id,
-          role: CONTRACT_ROLES[1]
-        }, { transaction: t })
+      for (let j = 0; j < req.body.assurances.length; j++) {
+        await ContractPerson.create(
+          {
+            ContractId: cont.id,
+            PersonId: req.body.assurances[j].id,
+            role: CONTRACT_ROLES[1],
+          },
+          { transaction: t }
+        )
       }
     }
 
@@ -78,21 +84,12 @@ exports.Post = catchAsync(async (req, res, next) => {
       status: 'success',
       ok: true,
       message: 'El contrato fue guardado con exito',
-      data: cont
+      data: cont,
     })
   })
 })
 
-exports.Put = update(Contract, [
-  'startDate',
-  'endDate',
-  'deposit',
-  'booking',
-  'state',
-  'description',
-  'admFeesPorc',
-  'currency'
-])
+exports.Put = update(Contract, ['startDate', 'endDate', 'deposit', 'booking', 'state', 'description', 'admFeesPorc', 'currency'])
 
 exports.AddPrice = create(ContractPrice)
 
@@ -101,18 +98,21 @@ exports.AddGarantes = catchAsync(async (req, res, next) => {
   if (!assurances || assurances.length <= 0) return next(new AppError('No se envió ningún garante', 400))
   await dbConnect.transaction(async (t) => {
     // eslint-disable-next-line semi-spacing
-    for (let j = 0;j < assurances.length;j++) {
-      await ContractPerson.create({
-        ContractId,
-        PersonId: assurances[j],
-        role: CONTRACT_ROLES[1]
-      }, { transaction: t })
+    for (let j = 0; j < assurances.length; j++) {
+      await ContractPerson.create(
+        {
+          ContractId,
+          PersonId: assurances[j],
+          role: CONTRACT_ROLES[1],
+        },
+        { transaction: t }
+      )
     }
     return res.json({
       code: 200,
       status: 'success',
       ok: true,
-      message: 'Los garantes fueron agregados con exito'
+      message: 'Los garantes fueron agregados con exito',
     })
   })
 })
@@ -121,24 +121,29 @@ exports.GetOwnerContracts = catchAsync(async (req, res, next) => {
   const { id } = req.params
   const properties = await Property.findAll({
     where: {
-      OwnerId: id
-      // state: "Ocupado",
+      PersonId: id,
+      state: 'Ocupado',
     },
-    attributes: ['id']
+    attributes: ['id'],
   })
   const ids = properties.map((p) => p.id)
   const contracts = await Contract.findAll({
     where: {
       PropertyId: { [Op.in]: ids },
-      // state: "En curso",
-      startDate: { [Op.lte]: new Date() }
-      // endDate: { [Op.gt]: new Date() },
+      state: CONTRACT_STATES[1],
+      startDate: { [Op.lte]: new Date() },
+      // endDate: { [Op.gt]: new Date() }, // no va porque aveces el contrato finaliza pero el inquilino sigue viviendo o el adm no lo finaliza por x motivo
     },
+    attributes: ['id', 'startDate', 'endDate', 'state', 'PropertyId', 'admFeesPorc'],
     include: [
-      // { model: PriceHistorial },
-      // { model: Client },
-      { model: Property }
-    ]
+      { model: ContractPrice, attributes: ['id', 'amount'] },
+      { model: Property, attributes: ['id', 'street', 'number', 'floor', 'dept'] },
+      {
+        model: ContractPerson,
+        attributes: ['role', 'id'],
+        include: { model: Person, attributes: ['id', 'fullName', 'docType', 'DocNumber'] },
+      },
+    ],
   })
   return res.json({
     code: 200,
@@ -146,7 +151,7 @@ exports.GetOwnerContracts = catchAsync(async (req, res, next) => {
     ok: true,
     results: contracts.length,
     message: 'Lista de contratos',
-    data: contracts
+    data: contracts,
   })
 })
 
@@ -156,8 +161,8 @@ exports.GetById = findOne(Contract, {
     //   model: Client
     // },
     {
-      model: Property
-    }
+      model: Property,
+    },
     // {
     //   model: Assurance
     // },
@@ -170,7 +175,7 @@ exports.GetById = findOne(Contract, {
     // {
     //   model: OwnerExpense
     // }
-  ]
+  ],
 })
 
 exports.Destroy = catchAsync(async (req, res, next) => {
@@ -214,7 +219,7 @@ exports.Destroy = catchAsync(async (req, res, next) => {
       { state: 'Libre' },
       {
         where: { id: contract.PropertyId },
-        transaction: t
+        transaction: t,
       }
     )
 
@@ -223,7 +228,7 @@ exports.Destroy = catchAsync(async (req, res, next) => {
     return res.json({
       ok: true,
       status: 'success',
-      message: 'El registro fue eliminado con exito'
+      message: 'El registro fue eliminado con exito',
     })
   })
 })
@@ -268,7 +273,7 @@ exports.finish = catchAsync(async (req, res, next) => {
       { state: 'Libre' },
       {
         where: { id: contract.PropertyId },
-        transaction: t
+        transaction: t,
       }
     )
 
@@ -276,7 +281,7 @@ exports.finish = catchAsync(async (req, res, next) => {
     return res.json({
       ok: true,
       status: 'success',
-      message: 'El contrato se finalizó con éxito'
+      message: 'El contrato se finalizó con éxito',
     })
   })
 })
@@ -338,8 +343,8 @@ exports.finish = catchAsync(async (req, res, next) => {
 exports.HistorialPrice = all(Contract, {
   include: [
     // { model: PriceHistorial },
-    { model: Property, include: { model: Person } }
-  ]
+    { model: Property, include: { model: Person } },
+  ],
 })
 
 // para obtener las deudas pagas o impagas de los clientes
@@ -347,17 +352,17 @@ exports.DebtsClients = catchAsync(async (req, res, next) => {
   const docs = await Contract.findAll({
     include: [
       // { model: Client },
-      { model: Property, include: { model: Person } }
+      { model: Property, include: { model: Person } },
       // { model: PriceHistorial },
       // { model: DebtClient }
-    ]
+    ],
   })
 
   return res.json({
     results: docs.length,
     ok: true,
     status: 'success',
-    data: docs
+    data: docs,
   })
 })
 
@@ -366,16 +371,16 @@ exports.DebtsOwners = catchAsync(async (req, res, next) => {
   const docs = await Contract.findAll({
     include: [
       // { model: Client },
-      { model: Property, include: { model: Person } }
+      { model: Property, include: { model: Person } },
       // { model: PriceHistorial },
       // { model: DebtOwner }
-    ]
+    ],
   })
 
   return res.json({
     results: docs.length,
     ok: true,
     status: 'success',
-    data: docs
+    data: docs,
   })
 })

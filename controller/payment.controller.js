@@ -3,10 +3,12 @@ const { dbConnect } = require('../db')
 const { all, paginate, findOne, update } = require('../generic/factoryControllers')
 const { catchAsync } = require('../helpers/catchAsync')
 const Contract = require('../schemas/contract')
+const ContractPerson = require('../schemas/contractPerson')
 const Debt = require('../schemas/debt')
 const Eventuality = require('../schemas/eventuality')
 const Payment = require('../schemas/payment')
 const PaymentType = require('../schemas/paymentType')
+const Person = require('../schemas/person')
 const Property = require('../schemas/property')
 
 exports.GetAll = all(Payment, {
@@ -16,11 +18,27 @@ exports.GetAll = all(Payment, {
       include: [
         {
           model: Property,
+          include: [
+            {
+              model: Person,
+            },
+          ],
+        },
+        {
+          model: ContractPerson,
+          include: [
+            {
+              model: Person,
+            },
+          ],
         },
       ],
     },
     {
       model: PaymentType,
+    },
+    {
+      model: Person,
     },
   ],
 })
@@ -31,11 +49,27 @@ exports.Paginate = paginate(Payment, {
       include: [
         {
           model: Property,
+          include: [
+            {
+              model: Person,
+            },
+          ],
+        },
+        {
+          model: ContractPerson,
+          include: [
+            {
+              model: Person,
+            },
+          ],
         },
       ],
     },
     {
       model: PaymentType,
+    },
+    {
+      model: Person,
     },
   ],
 })
@@ -56,7 +90,7 @@ const periodTemplate = (data) => {
     })
   }
   if (curMonthPaid.length > 0 || (prevDebts.length === 0 && curMonthPaid.length === 0)) {
-    monthSet.add(MONTHS_IN_SPANISH.findIndex((item) => item === data.month) + 1)
+    monthSet.add(data.month)
     yearSet.add(data.year)
   }
   return (
@@ -118,7 +152,7 @@ exports.Post = catchAsync(async (req, res, next) => {
           expiredDate: new Date().getTime() + 30 * 24 * 60 * 60 * 1000, //actual date plus 1 month
           ContractId: req.body.ContractId,
           paymentId: payment.id,
-          // PropertyId: req.body.PropertyId,
+          OrganizationId: req.user.OrganizationId,
         },
         {
           transaction: transact,
@@ -169,9 +203,10 @@ exports.allDebt = (req, res, next) => {}
 
 exports.Destroy = catchAsync(async (req, res, next) => {
   const payment = await Payment.findByPk(req.params.id)
-  if (!payment) return next(new AppError('No existe el pago', 404))
+  if (!payment) return next(new AppError('El pago no existe ', 404))
+  console.log('entroooooooo')
 
-  const transact = await sequelize.transaction()
+  const transact = await dbConnect.transaction()
   try {
     if (payment.expenseDetails.length > 0) {
       for (let j = 0; j < payment.expenseDetails.length; j++) {
@@ -189,16 +224,16 @@ exports.Destroy = catchAsync(async (req, res, next) => {
             }
           )
         } else {
-          const mon = MONTHS_IN_SPANISH.findIndex((a) => a == payment.month) + 1
-          if (mon == new Date().getMonth() + 1 && payment.year == new Date().getFullYear()) {
+          if (payment.month == new Date().getMonth() + 1 && payment.year == new Date().getFullYear()) {
           } else {
             if (!payment.expenseDetails[j].recharge) {
+              console.log('CREATED DEBT ::: ', payment.expenseDetails[j])
               await Debt.create(
                 {
                   ContractId: payment.expenseDetails[j].ContractId,
                   amount: payment.expenseDetails[j].amount,
                   description: payment.expenseDetails[j].description,
-                  month: MONTHS_IN_SPANISH.findIndex((a) => a == payment.month) + 1,
+                  month: payment.month,
                   year: payment.year,
                 },
                 { transaction: transact }
@@ -208,7 +243,7 @@ exports.Destroy = catchAsync(async (req, res, next) => {
         }
       }
     }
-
+    // remove the eventuality added when the client did an partial payment
     await Eventuality.destroy({
       where: { paymentId: payment.id, isReverted: true },
       transaction: transact,
@@ -217,7 +252,7 @@ exports.Destroy = catchAsync(async (req, res, next) => {
     if (payment.eventualityDetails.length > 0) {
       for (let j = 0; j < payment.eventualityDetails.length; j++) {
         await Eventuality.update(
-          { clientPaid: false },
+          { clientPaid: null },
           {
             where: { id: payment.eventualityDetails[j].id },
             transaction: transact,
@@ -232,7 +267,7 @@ exports.Destroy = catchAsync(async (req, res, next) => {
       code: 200,
       status: 'success',
       ok: true,
-      message: 'El registro fue eliminado con exito',
+      message: 'El pago fue revertido con exito',
       //   data: payment,
     })
   } catch (error) {
