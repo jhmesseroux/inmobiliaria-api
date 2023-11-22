@@ -106,6 +106,10 @@ exports.Post = catchAsync(async (req, res, next) => {
   const transact = await dbConnect.transaction()
   console.log(req.body)
   req.body.OrganizationId = req.user.OrganizationId
+
+  const { PersonId, ContractId } = req.body
+  console.log({ PersonId, ContractId })
+
   try {
     let paidCurMonth = false
     if (req.body.expenseDetails.length > 0) {
@@ -124,17 +128,37 @@ exports.Post = catchAsync(async (req, res, next) => {
             }
           )
         }
-
-        if (req.body.expenseDetails[j].hasOwnProperty('paidCurrentMonth')) {
-          paidCurMonth = true
+        if (req.body.PersonId !== null && req.body.PersonId !== undefined) {
+          if (req.body.expenseDetails[j].hasOwnProperty('paidCurrentMonth')) {
+            paidCurMonth = true
+          }
         }
       }
     }
-    req.body.paidCurrentMonth = paidCurMonth
 
-    const payment = await Payment.create(req.body, { transaction: transact })
+    let ev
+    if (req.body.PersonId !== null && req.body.PersonId !== undefined && !req.body.ContractId) {
+      ev = { ownerPaid: new Date() }
+    } else {
+      ev = { clientPaid: new Date() }
+    }
 
-    if (req.body.paidTotal && req.body.paidTotal > 0 && req.body.paidTotal !== req.body.total) {
+    if (req.body.eventualityDetails.length > 0) {
+      for (let j = 0; j < req.body.eventualityDetails.length; j++) {
+        await Eventuality.update(ev, {
+          where: { id: req.body.eventualityDetails[j].id },
+          transaction: transact,
+        })
+      }
+    }
+
+    if (
+      !req.body.PersonId &&
+      req.body.ContractId &&
+      req.body.paidTotal &&
+      req.body.paidTotal > 0 &&
+      req.body.paidTotal !== req.body.total
+    ) {
       // add a eventualities with the difference
       let text = req.body.paidTotal > req.body.total ? 'A cuenta ' : 'Saldo '
       const monthAndYearText = periodTemplate(req.body)
@@ -142,7 +166,6 @@ exports.Post = catchAsync(async (req, res, next) => {
         {
           description: text + monthAndYearText,
           title: text + monthAndYearText,
-          // req.body.month + '/' + req.body.year,
           ownerAmount: 0,
           clientAmount: req.body.total - req.body.paidTotal,
           amount: req.body.total - req.body.paidTotal,
@@ -160,17 +183,8 @@ exports.Post = catchAsync(async (req, res, next) => {
       )
     }
 
-    if (req.body.eventualityDetails.length > 0) {
-      for (let j = 0; j < req.body.eventualityDetails.length; j++) {
-        await Eventuality.update(
-          { clientPaid: new Date() },
-          {
-            where: { id: req.body.eventualityDetails[j].id },
-            transaction: transact,
-          }
-        )
-      }
-    }
+    req.body.paidCurrentMonth = paidCurMonth
+    const payment = await Payment.create(req.body, { transaction: transact })
 
     await transact.commit()
     return res.json({
@@ -244,20 +258,26 @@ exports.Destroy = catchAsync(async (req, res, next) => {
       }
     }
     // remove the eventuality added when the client did an partial payment
-    await Eventuality.destroy({
-      where: { paymentId: payment.id, isReverted: true },
-      transaction: transact,
-    })
+    if (payment.ContractId) {
+      await Eventuality.destroy({
+        where: { paymentId: payment.id, isReverted: true },
+        transaction: transact,
+      })
+    }
+
+    let ev
+    if (payment.ContractId) {
+      ev = { clientPaid: null }
+    } else {
+      ev = { ownerPaid: null }
+    }
 
     if (payment.eventualityDetails.length > 0) {
       for (let j = 0; j < payment.eventualityDetails.length; j++) {
-        await Eventuality.update(
-          { clientPaid: null },
-          {
-            where: { id: payment.eventualityDetails[j].id },
-            transaction: transact,
-          }
-        )
+        await Eventuality.update(ev, {
+          where: { id: payment.eventualityDetails[j].id },
+          transaction: transact,
+        })
       }
     }
 

@@ -6,12 +6,12 @@ const Contract = require('../schemas/contract')
 const Property = require('../schemas/property')
 const { dbConnect } = require('../db')
 
-exports.GetAll = all(Debt)
+exports.GetAll = all(Debt, { include: [{ model: Contract, include: [{ model: Property }] }] })
+exports.Paginate = paginate(Debt, { include: [{ model: Contract, include: [{ model: Property }] }] })
 exports.Post = create(Debt)
 exports.GetById = findOne(Debt, { include: [{ model: Contract }] })
 exports.Put = update(Debt, ['month', 'year', 'ContractId', 'amount', 'description'])
 exports.Destroy = destroy(Debt)
-exports.Paginate = paginate(Debt)
 
 exports.jobDebtsClients = catchAsync(async (req, res, next) => {
   const month = new Date().getMonth()
