@@ -9,6 +9,119 @@ const { dbConnect } = require('../db')
 const ContractPerson = require('../schemas/contractPerson')
 const ContractPrice = require('../schemas/contractPrice')
 const { CONTRACT_ROLES, CONTRACT_STATES } = require('../constants')
+const Expense = require('../schemas/expense')
+const Payment = require('../schemas/payment')
+const Eventuality = require('../schemas/eventuality')
+const Debt = require('../schemas/debt')
+
+exports.SendReceiptCurrentMonth = catchAsync(async (req, res, next) => {
+  // get all contracts with state = 'En curso' and endDate > now and startDate < now
+  const contracts = await Contract.findAll({
+    where: {
+      state: CONTRACT_STATES[1],
+      endDate: { [Op.gt]: new Date() },
+      startDate: { [Op.lt]: new Date() },
+    },
+    include: [
+      {
+        model: Property,
+        include: [
+          { model: Person },
+          {
+            model: Eventuality,
+            where: {
+              clientPaid: null,
+              clientAmount: { [Op.ne]: 0 },
+            },
+            required: false,
+          },
+        ],
+      },
+      {
+        model: ContractPerson,
+        where: {
+          role: CONTRACT_ROLES[0],
+        },
+        include: { model: Person },
+      },
+      { model: ContractPrice },
+      {
+        model: Expense,
+        where: {
+          isOwner: false,
+        },
+        required: false,
+      },
+      {
+        model: Debt,
+        where: {
+          isOwner: false,
+          paidDate: null,
+          paid: 0,
+          amount: { [Op.ne]: 0 },
+        },
+        required: false,
+      },
+      {
+        model: Eventuality,
+        where: {
+          clientPaid: null,
+          clientAmount: { [Op.ne]: 0 },
+        },
+        required: false,
+      },
+    ],
+  })
+
+  // VALIDATE IF EACH CONTRACT HAS ALREADY PAID THE CURRENT MONTH
+  const contractsToSend = []
+  for (let i = 0; i < contracts.length; i++) {
+    const payments = await Payment.findAll({
+      where: {
+        ContractId: contracts[i].id,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      },
+    })
+    if (payments.length <= 0) contractsToSend.push(contracts[i])
+  }
+
+  // SEND EMAIL TO EACH CONTRACT
+  // for (let i = 0; i < contractsToSend.length; i++) {
+  //   const contract = contractsToSend[i]
+  //   const { Property, ContractPeople, ContractPrices } = contract
+  //   const { Person: Client } = ContractPeople.find((cp) => cp.role === CONTRACT_ROLES[0])
+  //   const { Person: Owner } = Property
+  //   const { amount } = ContractPrices[0]
+  //   const { street, number, floor, dept } = Property
+  //   const { fullName } = Client
+  //   const { email } = Owner
+
+  //   const subject = `Recibo de alquiler ${street} ${number} ${floor} ${dept}`
+  //   const html = `
+  //     <h3>Estimado ${fullName}</h3>
+  //     <p>Le adjuntamos el recibo de alquiler correspondiente al mes de ${new Date().toLocaleString('es-ES', { month: 'long' })} ${new Date().getFullYear()}</p>
+  //     <p>El monto a pagar es de $${amount}</p>
+  //     <p>Saludos</p>
+  //   `
+  //   const attachments = [
+  //     {
+  //       filename: 'recibo.pdf',
+  //       path: 'http://localhost:3000/api/contract/pdf/' + contract.id,
+  //       contentType: 'application/pdf',
+  //     },
+  //   ]
+  //   await sendEmail(email, subject, html, attachments)
+  // }
+
+  return res.json({
+    ok: true,
+    status: 'success',
+    message: 'Se enviaron los recibos correctamente',
+    contractsToSend,
+    contracts,
+  })
+})
 
 exports.GetAll = all(Contract, {
   include: [

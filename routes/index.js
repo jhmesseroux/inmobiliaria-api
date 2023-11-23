@@ -3,10 +3,12 @@ const router = require('express').Router()
 const VERSION = '/api/v1'
 router.use(`${VERSION}/organizations`, require('./organizationRoutes'))
 router.use(`${VERSION}/accounts`, require('./accountRoutes'))
+
 router.use(`${VERSION}/zones`, require('./zone.router'))
 router.use(`${VERSION}/parameters`, require('./parameter.router'))
 router.use(`${VERSION}/paymenttypes`, require('./paymenttype.router'))
 router.use(`${VERSION}/propertytypes`, require('./propertyType.router'))
+
 router.use(`${VERSION}/persons`, require('./person.router'))
 router.use(`${VERSION}/properties`, require('./property.router'))
 router.use(`${VERSION}/auth`, require('./auth.router'))

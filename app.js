@@ -36,8 +36,8 @@ if (process.env.NODE_ENV !== 'production') {
   // require('./schemas/eventuality')
   // require('./schemas/expense')
   // require('./schemas/payment')
+  // require('./schemas/debtlog')
 
-  // require('./schemas/rubroArticulo')
   // require('./schemas/user')
   // require('./schemas/parametro')
   // dbConnect

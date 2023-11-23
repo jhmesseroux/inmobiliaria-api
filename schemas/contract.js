@@ -14,53 +14,53 @@ const Contract = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true
+      autoIncrement: true,
     },
     PropertyId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       validate: {
         notNull: {
-          msg: 'El propietario es obligatorio'
+          msg: 'El propietario es obligatorio',
         },
         notEmpty: {
-          msg: 'El propietario es obligatorio'
-        }
-      }
+          msg: 'El propietario es obligatorio',
+        },
+      },
     },
     startDate: {
       allowNull: false,
       type: DataTypes.DATEONLY,
       validate: {
         notNull: {
-          msg: 'La fecha del comienzo es obligatoria'
+          msg: 'La fecha del comienzo es obligatoria',
         },
         notEmpty: {
-          msg: 'La fecha del comienzo es obligatoria'
-        }
-      }
+          msg: 'La fecha del comienzo es obligatoria',
+        },
+      },
     },
     endDate: {
       allowNull: false,
       type: DataTypes.DATEONLY,
       validate: {
         notNull: {
-          msg: 'La fecha fin es obligatoria'
+          msg: 'La fecha fin es obligatoria',
         },
         notEmpty: {
-          msg: 'La fecha fin es obligatoria'
+          msg: 'La fecha fin es obligatoria',
         },
         isGreaterThanStartDate(value) {
           if (value <= this.startDate) {
             throw new Error('La fecha fin del contrato debe ser mayor que la fecha de inicio.')
           }
-        }
-      }
+        },
+      },
     },
     admFeesPorc: {
       allowNull: false,
       type: DataTypes.FLOAT,
-      defaultValue: 2
+      defaultValue: 2,
       // gastos de administración | gestión | comisión
     },
     // currency: {
@@ -80,26 +80,38 @@ const Contract = dbConnect.define(
       validate: {
         isIn: {
           args: [CONTRACT_STATES],
-          msg: 'El estado ingresado no está permitido.'
-        }
-      }
+          msg: 'El estado ingresado no está permitido.',
+        },
+      },
+    },
+    comission: {
+      allowNull: false,
+      type: DataTypes.FLOAT,
+      validate: {
+        notNull: {
+          msg: 'La comisión es obligatoria.',
+        },
+        notEmpty: {
+          msg: 'La comisión es obligatoria.',
+        },
+      },
     },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.'
+          msg: 'La organización es obligatoria.',
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.'
-        }
-      }
+          msg: 'La organización es obligatoria.',
+        },
+      },
     },
     booking: DataTypes.FLOAT, // reserva | seña
     deposit: DataTypes.FLOAT,
     description: DataTypes.STRING,
-    motive: DataTypes.STRING // motivo de la finalización del contrato | motivo de la cancelación del contrato
+    motive: DataTypes.STRING, // motivo de la finalización del contrato | motivo de la cancelación del contrato
   },
   {
     tableName: 'contracts',
@@ -107,9 +119,9 @@ const Contract = dbConnect.define(
       {
         unique: true,
         fields: ['OrganizationId', 'PropertyId', 'startDate', 'state'],
-        name: 'property_organization_state_unique'
-      }
-    ]
+        name: 'property_organization_state_unique',
+      },
+    ],
   }
 )
 

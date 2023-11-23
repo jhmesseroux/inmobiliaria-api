@@ -5,6 +5,7 @@ const auth = require('../controller/authController')
 router.use(auth.protect)
 router.post('/', ctrl.Post)
 router.post('/:id/add-garantes', ctrl.AddGarantes)
+router.post('/job/sendReceiptMpnthly', ctrl.SendReceiptCurrentMonth)
 
 router.get('/', ctrl.GetAll)
 router.get('/paginate', ctrl.Paginate)
@@ -17,7 +18,7 @@ router.put('/:id/add-price', ctrl.AddPrice)
 
 router.delete('/:id', ctrl.Destroy)
 // router.get('/expired-contracts/:days', ctrl.ExpiredContracts)
-router.get('/historial/prices', ctrl.HistorialPrice)
+
 router.get('/debts/client/all', ctrl.DebtsClients)
 router.get('/debts/owner/all', ctrl.DebtsOwners)
 

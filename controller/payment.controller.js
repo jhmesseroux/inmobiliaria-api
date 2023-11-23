@@ -1,4 +1,5 @@
-const { MONTHS_IN_SPANISH } = require('../constants')
+const { Op } = require('sequelize')
+const { MONTHS_IN_SPANISH, CONTRACT_ROLES } = require('../constants')
 const { dbConnect } = require('../db')
 const { all, paginate, findOne, update } = require('../generic/factoryControllers')
 const { catchAsync } = require('../helpers/catchAsync')
@@ -294,4 +295,143 @@ exports.Destroy = catchAsync(async (req, res, next) => {
     await transact.rollback()
     throw error
   }
+})
+
+exports.NotPaidCurrentMonthContract = catchAsync(async (req, res, next) => {
+  //  get all payment for the current month and year
+  const paidContracts = await Payment.findAll({
+    where: {
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+      ContractId: {
+        [Op.ne]: null,
+      },
+    },
+  })
+  const paidContractsIds = paidContracts.map((item) => item.ContractId)
+
+  // get all contracts that are in progress
+
+  console.log('helllo')
+  const notPaidContracts = await Contract.findAll({
+    where: {
+      state: 'En curso',
+      startDate: {
+        [Op.lte]: new Date(),
+      },
+      endDate: {
+        [Op.gte]: new Date(),
+      },
+      id: {
+        [Op.notIn]: paidContractsIds,
+      },
+    },
+    include: [
+      {
+        model: Payment,
+        where: {
+          month: {
+            [Op.eq]: new Date().getMonth() + 1,
+          },
+          year: {
+            [Op.eq]: new Date().getFullYear(),
+          },
+        },
+        required: false,
+      },
+      {
+        model: Property,
+        include: [
+          {
+            model: Person,
+          },
+        ],
+      },
+      {
+        model: ContractPerson,
+        where: {
+          role: CONTRACT_ROLES[0],
+        },
+        include: [
+          {
+            model: Person,
+          },
+        ],
+      },
+    ],
+  })
+
+  return res.json({
+    code: 200,
+    status: 'success',
+    length: notPaidContracts.length,
+    ok: true,
+    message: 'Contratos que no tienen pagos registrados para el mes actual',
+    data: notPaidContracts,
+    // paidContracts,
+  })
+})
+
+exports.NotPaidCurrentMonthOwner = catchAsync(async (req, res, next) => {
+  //  get all payment for the current month and year
+  const paidOwners = await Payment.findAll({
+    where: {
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+      PersonId: {
+        [Op.ne]: null,
+      },
+    },
+  })
+  const paidOwnersId = paidOwners.map((item) => item.PersonId)
+
+  const notPaidOwners = await Person.findAll({
+    where: {
+      id: {
+        [Op.notIn]: paidOwnersId,
+      },
+      isOwner: true,
+    },
+    include: [
+      {
+        model: Property,
+        where: {
+          state: 'Ocupado',
+        },
+        required: true,
+        include: [
+          {
+            model: Contract,
+            where: {
+              state: 'En curso',
+              startDate: {
+                [Op.lte]: new Date(),
+              },
+              endDate: {
+                [Op.gte]: new Date(),
+              },
+            },
+            include: [
+              {
+                model: ContractPerson,
+                where: {
+                  role: CONTRACT_ROLES[0],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  })
+
+  return res.json({
+    code: 200,
+    status: 'success',
+    length: notPaidOwners.length,
+    ok: true,
+    message: 'Propietarios que no tienen pagos registrados para el mes actual',
+    data: notPaidOwners,
+    // paidContracts,
+  })
 })

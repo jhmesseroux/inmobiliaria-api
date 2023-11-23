@@ -9,6 +9,9 @@ router.get('/', ctrl.GetAll)
 router.get('/paginate', ctrl.Paginate)
 router.get('/:id', ctrl.GetById)
 
+router.get('/notpaid/contracts', ctrl.NotPaidCurrentMonthContract)
+router.get('/notpaid/owners', ctrl.NotPaidCurrentMonthOwner)
+
 router.post('/', ctrl.Post)
 
 router.put('/:id', ctrl.Put)

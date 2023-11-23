@@ -12,100 +12,99 @@ const Property = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true
+      autoIncrement: true,
     },
     city: {
       allowNull: false,
       type: DataTypes.STRING(50),
       validate: {
         notNull: {
-          msg: 'La localidad es obligatoria'
+          msg: 'La localidad es obligatoria',
         },
         notEmpty: {
-          msg: 'La localidad es obligatoria'
-        }
-      }
+          msg: 'La localidad es obligatoria',
+        },
+      },
     },
     province: {
       allowNull: false,
       type: DataTypes.STRING(50),
       validate: {
         notNull: {
-          msg: 'La provincia es obligatoria'
+          msg: 'La provincia es obligatoria',
         },
         notEmpty: {
-          msg: 'La provincia es obligatoria'
-        }
-      }
+          msg: 'La provincia es obligatoria',
+        },
+      },
     },
     ZoneId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       validate: {
         notNull: {
-          msg: 'La zona es obligatoria'
+          msg: 'La zona es obligatoria',
         },
         notEmpty: {
-          msg: 'La zona es obligatoria'
-        }
-      }
+          msg: 'La zona es obligatoria',
+        },
+      },
     },
     PropertyTypeId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       validate: {
         notNull: {
-          msg: 'El tipo de propiedad es obligatorio'
+          msg: 'El tipo de propiedad es obligatorio',
         },
         notEmpty: {
-          msg: 'El tipo de propiedad es obligatorio'
-        }
-      }
+          msg: 'El tipo de propiedad es obligatorio',
+        },
+      },
     },
     PersonId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       validate: {
         notNull: {
-          msg: 'El dueño es obligatorio'
+          msg: 'El dueño es obligatorio',
         },
         notEmpty: {
-          msg: 'El dueño es obligatorio'
-        }
-      }
+          msg: 'El dueño es obligatorio',
+        },
+      },
     },
     street: {
       allowNull: false,
       type: DataTypes.STRING(50),
       validate: {
         notNull: {
-          msg: 'La calle es obligatoria'
+          msg: 'La calle es obligatoria',
         },
         notEmpty: {
-          msg: 'La calle es obligatoria'
+          msg: 'La calle es obligatoria',
         },
         len: {
           args: [1, 50],
-          msg: 'La calle debe tener entre 1 y 50 caracteres'
-
-        }
-      }
+          msg: 'La calle debe tener entre 1 y 50 caracteres',
+        },
+      },
     },
     number: {
       allowNull: false,
       type: DataTypes.STRING(5),
       validate: {
         notNull: {
-          msg: 'El número de la calle es obligatorio'
+          msg: 'El número de la calle es obligatorio',
         },
         notEmpty: {
-          msg: 'El número de la calle es obligatorio'
+          msg: 'El número de la calle es obligatorio',
         },
         len: {
           args: [1, 5],
-          msg: 'El número de la calle debe tener entre 1 y 5 caracteres'
-        }
-      }
+          msg: 'El número de la calle debe tener entre 1 y 5 caracteres',
+        },
+      },
     },
     isFor: {
       allowNull: false,
@@ -114,13 +113,13 @@ const Property = dbConnect.define(
       validate: {
         isIn: {
           args: [['Venta', 'Alquiler']],
-          msg: 'El valor ingresado no está permitido.'
+          msg: 'El valor ingresado no está permitido.',
         },
         len: {
           args: [1, 8],
-          msg: 'El para debe tener entre 1 y 8 caracteres.'
-        }
-      }
+          msg: 'El para debe tener entre 1 y 8 caracteres.',
+        },
+      },
     },
     state: {
       allowNull: false,
@@ -129,37 +128,37 @@ const Property = dbConnect.define(
       validate: {
         isIn: {
           args: [['Libre', 'Ocupado']],
-          msg: 'El estado ingresado no está permitido.'
-        }
-      }
+          msg: 'El estado ingresado no está permitido.',
+        },
+      },
     },
     folderNumber: {
       allowNull: true,
       type: DataTypes.STRING(10),
       unique: {
         name: 'folderNumber_pty__unique',
-        msg: 'Ya existe una propiedad con ese número de carpeta.'
+        msg: 'Ya existe una propiedad con ese número de carpeta.',
       },
       len: {
         args: [1, 10],
-        msg: 'El número de carpeta debe tener entre 1 y 10 caracteres.'
-      }
+        msg: 'El número de carpeta debe tener entre 1 y 10 caracteres.',
+      },
     },
     OrganizationId: {
       allowNull: false,
       type: DataTypes.BIGINT,
       unique: {
         name: 'folderNumber_pty__unique',
-        msg: 'Ya existe una propiedad con ese número de carpeta.'
+        msg: 'Ya existe una propiedad con ese número de carpeta.',
       },
       validate: {
         notNull: {
-          msg: 'La organización es obligatoria.'
+          msg: 'La organización es obligatoria.',
         },
         notEmpty: {
-          msg: 'La organización es obligatoria.'
-        }
-      }
+          msg: 'La organización es obligatoria.',
+        },
+      },
     },
     description: DataTypes.STRING,
     nroPartWater: DataTypes.STRING(50),
@@ -167,10 +166,10 @@ const Property = dbConnect.define(
     nroPartAPI: DataTypes.STRING(50),
     nroPartGas: DataTypes.STRING(50),
     floor: DataTypes.STRING(3),
-    dept: DataTypes.STRING(3)
+    dept: DataTypes.STRING(3),
   },
   {
-    tableName: 'properties'
+    tableName: 'properties',
   }
 )
 
