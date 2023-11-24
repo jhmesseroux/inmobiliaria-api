@@ -6,10 +6,41 @@ const filterQueryParams = (queryFiltered) => {
   const options = { ...queryFiltered }
   console.log('entroooooooooooooooooooooooo')
   console.log(options)
+  // if (1 === 1) return options
   Object.keys(queryFiltered).forEach((k) => {
-    console.log('ahiiiiiiiiiiiiiiiiiiiiiiiiii')
+    if (k === 'multiples') {
+      const multipleValues = queryFiltered[k].split(':')
+      console.log({ multipleValues })
+      options[Op.or] = multipleValues[1].split(',').map((field) => {
+        // Puedes aplicar lógica adicional aquí según tus necesidades
+
+        const condition = {}
+        condition[field] = {
+          [Op.like]: `%${multipleValues[0]}%`,
+        }
+        return condition
+
+        // return (options[field] = {
+        //   [Op.substring]: multipleValues[0],
+        // })
+      })
+      console.log('BEFORE DELETE MULTIPLES', { options })
+      // delete multples from options
+      delete options.multiples
+      // delete each key from multiplesValues
+      // multipleValues[1].split(',').forEach((field) => {
+      //   delete options[field]
+      // })
+      console.log('AFTER DELETE MULTIPLES', { options })
+      return
+    }
+    console.log('........................................no va allegar acaaaaaaa...................................')
+    console.log({ options })
+    console.log('kkkkkkkkkkkkkkkkkkkkkkkk')
+    console.log({ k })
     if (queryFiltered[k].toString().split(':').length > 1) {
       const val = queryFiltered[k].toString().split(':')
+      console.log({ val })
       switch (val[1]) {
         case 'like':
           options[`${k}`] = {

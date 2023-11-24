@@ -202,7 +202,7 @@ exports.Post = catchAsync(async (req, res, next) => {
   })
 })
 
-exports.Put = update(Contract, ['startDate', 'endDate', 'deposit', 'booking', 'state', 'description', 'admFeesPorc', 'currency'])
+exports.Put = update(Contract, ['startDate', 'endDate', 'deposit', 'booking', 'state', 'description', 'admFeesPorc', 'comission'])
 
 exports.AddPrice = create(ContractPrice)
 
