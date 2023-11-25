@@ -165,6 +165,7 @@ exports.bulk = (Model) =>
 exports.update = (Model, allowedFileds) =>
   catchAsync(async (req, res, next) => {
     const insertedFileds = allowedFileds ? filterFields(req.body, allowedFileds) : req.body
+    console.log(insertedFileds)
     const doc = await Model.update(insertedFileds, {
       where: { id: req.params.id },
     })

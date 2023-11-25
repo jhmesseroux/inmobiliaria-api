@@ -12,24 +12,30 @@ const PaymentType = require('../schemas/paymentType')
 const Person = require('../schemas/person')
 const Property = require('../schemas/property')
 
-exports.GetAll = all(Payment, {
+const include = {
   include: [
     {
       model: Contract,
+      attributes: ['id', 'startDate', 'endDate', 'state', 'PropertyId'],
       include: [
         {
           model: Property,
+          attributes: ['id', 'street', 'number', 'floor', 'dept', 'folderNumber'],
           include: [
             {
               model: Person,
+              attributes: ['id', 'address', 'fullName'],
             },
           ],
         },
         {
           model: ContractPerson,
+          where: { role: CONTRACT_ROLES[0] },
+          required: false,
           include: [
             {
               model: Person,
+              attributes: ['id', 'address', 'fullName'],
             },
           ],
         },
@@ -37,43 +43,16 @@ exports.GetAll = all(Payment, {
     },
     {
       model: PaymentType,
+      attributes: ['name'],
     },
     {
       model: Person,
+      attributes: ['id', 'address', 'fullName'],
     },
   ],
-})
-exports.Paginate = paginate(Payment, {
-  include: [
-    {
-      model: Contract,
-      include: [
-        {
-          model: Property,
-          include: [
-            {
-              model: Person,
-            },
-          ],
-        },
-        {
-          model: ContractPerson,
-          include: [
-            {
-              model: Person,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      model: PaymentType,
-    },
-    {
-      model: Person,
-    },
-  ],
-})
+}
+exports.GetAll = all(Payment, include)
+exports.Paginate = paginate(Payment, include)
 
 const periodTemplate = (data) => {
   const monthSet = new Set()
@@ -153,6 +132,10 @@ exports.Post = catchAsync(async (req, res, next) => {
       }
     }
 
+    // save  payment
+    req.body.paidCurrentMonth = paidCurMonth
+    const payment = await Payment.create(req.body, { transaction: transact })
+
     if (
       !req.body.PersonId &&
       req.body.ContractId &&
@@ -184,9 +167,6 @@ exports.Post = catchAsync(async (req, res, next) => {
       )
     }
 
-    req.body.paidCurrentMonth = paidCurMonth
-    const payment = await Payment.create(req.body, { transaction: transact })
-
     await transact.commit()
     return res.json({
       code: 200,
@@ -212,9 +192,6 @@ exports.GetById = findOne(Payment, {
     },
   ],
 })
-
-exports.Put = update(Payment, ['PaymentTypeId', 'recharge', 'total', 'month', 'year', 'eventualityDetails', 'ExpenseDetails', 'obs'])
-exports.allDebt = (req, res, next) => {}
 
 exports.Destroy = catchAsync(async (req, res, next) => {
   const payment = await Payment.findByPk(req.params.id)

@@ -37,8 +37,10 @@ if (process.env.NODE_ENV !== 'production') {
   // require('./schemas/expense')
   // require('./schemas/payment')
   // require('./schemas/debtlog')
+  // require('./schemas/visit')
+  // require('./schemas/claim')
+  // require('./schemas/budget')
 
-  // require('./schemas/user')
   // require('./schemas/parametro')
   // dbConnect
   //   .sync({ alter: true })
