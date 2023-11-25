@@ -1,12 +1,5 @@
 const Organization = require('../schemas/organization')
-const {
-  all,
-  paginate,
-  create,
-  findOne,
-  update,
-  destroy,
-} = require('../Generic/factoryControllers')
+const { all, paginate, create, findOne, update, destroy } = require('../generic/factoryControllers')
 const { catchAsync } = require('../helpers/catchAsync')
 const jwt = require('jsonwebtoken')
 const Account = require('../schemas/account')
@@ -19,5 +12,3 @@ exports.Create = create(Organization, ['name'])
 exports.GetById = findOne(Organization)
 exports.Put = update(Organization, ['name'])
 exports.Destroy = destroy(Organization)
-
-
