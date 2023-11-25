@@ -4,11 +4,12 @@ const { all, paginate, create, findOne, update, destroy } = require('../generic/
 const Budget = require('../schemas/budget')
 const Property = require('../schemas/property')
 
-const allowedFields = ['PropertyId', 'type', 'description', 'category', 'photo', 'approved', 'state', 'charged', 'belongsTo']
+const allowedFields = ['type', 'description', 'category', 'photo', 'approved', 'state', 'charged', 'belongsTo']
 
 exports.uploadPhoto = catchAsync(async (req, res, next) => {
   if (!req.body.photo || req.body.photo === null || req.body?.photo.length < 300) return next()
   const imagePath = req.body.photo
+  // console.log(imagePath)
   const options = { use_filename: true, unique_filename: false, overwrite: true, format: 'png' }
   try {
     const result = await cloudinary.uploader.upload(imagePath, {
@@ -30,8 +31,8 @@ exports.uploadPhoto = catchAsync(async (req, res, next) => {
 })
 
 exports.GetAll = all(Budget, { include: [{ model: Property, attributes: ['id', 'street', 'number', 'dept', 'floor'] }] })
-exports.Paginate = paginate(Budget)
-exports.Create = create(Budget, allowedFields)
+exports.Paginate = paginate(Budget, { include: [{ model: Property, attributes: ['id', 'street', 'number', 'dept', 'floor'] }] })
+exports.Create = create(Budget)
 exports.GetById = findOne(Budget)
 exports.Put = update(Budget, allowedFields)
 
