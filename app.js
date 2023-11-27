@@ -40,8 +40,8 @@ if (process.env.NODE_ENV !== 'production') {
   // require('./schemas/visit')
   // require('./schemas/claim')
   // require('./schemas/budget')
+  // require('./schemas/maillog')
 
-  // require('./schemas/parametro')
   // dbConnect
   //   .sync({ alter: true })
   //   .then((res) => {

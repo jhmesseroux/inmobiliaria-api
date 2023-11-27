@@ -2,10 +2,9 @@ const nodemailer = require('nodemailer')
 const pug = require('pug')
 
 module.exports = class Email {
-
   constructor(data) {
     this.data = data
-    this.from = `Administración de Consorcios y Propiedades<${process.env.EMAIL_FROM}>`
+    this.from = `${data.organizationName}<${data.organizationEmail}>`
   }
 
   newTransport() {
@@ -15,8 +14,8 @@ module.exports = class Email {
         service: 'SendGrid',
         auth: {
           user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_PASSWORD
-        }
+          pass: process.env.SENDGRID_PASSWORD,
+        },
       })
     }
 
@@ -31,8 +30,8 @@ module.exports = class Email {
       port: 2525,
       auth: {
         user: '5bd15bd76859d7',
-        pass: '27fa67a062f87b'
-      }
+        pass: '27fa67a062f87b',
+      },
     })
   }
 
@@ -40,7 +39,7 @@ module.exports = class Email {
     // 1) Render HTML based on a pug template
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       data: this.data,
-      subject
+      subject,
     })
 
     // 2) Define email options
@@ -48,7 +47,7 @@ module.exports = class Email {
       from: this.from,
       to: this.data.email,
       subject,
-      html
+      html,
       // text: htmlToText.fromString(html),
     }
 
@@ -67,19 +66,19 @@ module.exports = class Email {
     await this.send('passwordReset', 'Recuperacion de contraseña válida por 10 minutos')
   }
   async sendExpireContract() {
-    await this.send('expireContract', 'Vencimiento de contrato')
+    await this.send('expiredContract', 'Vencimiento de contrato')
   }
   async sendNoticeDebtForOneMonth() {
-    await this.send('debtOneMonth', 'Aviso deudas')
+    await this.send('debtOneMonth', 'Aviso deudas de 1 mes')
   }
   async sendNoticeDebtForTwoMonth() {
-    await this.send('debtTwoMonth', 'Aviso deudas')
+    await this.send('debtTwoMonth', 'Aviso deudas de 2 meses')
   }
   async sendNoticeDebtForThreeMonth() {
-    await this.send('debtThreeMonth', 'Aviso deudas')
+    await this.send('debtThreeMonth', 'Aviso deudas de 3 meses')
   }
   async sendNoticeDebtForFourMonth() {
-    await this.send('debtFourMonth', 'Aviso deudas')
+    await this.send('debtFourMonth', 'Aviso deudas de 3 meses')
   }
   async sendNoticeDebtForAssurance() {
     await this.send('noticeForAssurance', 'Notificación a garantías por deuda de alquileres')

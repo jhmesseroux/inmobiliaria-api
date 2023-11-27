@@ -11,6 +11,7 @@ const Payment = require('../schemas/payment')
 const PaymentType = require('../schemas/paymentType')
 const Person = require('../schemas/person')
 const Property = require('../schemas/property')
+const ContractPrice = require('../schemas/contractPrice')
 
 const include = {
   include: [
@@ -35,7 +36,7 @@ const include = {
           include: [
             {
               model: Person,
-              attributes: ['id', 'address', 'fullName'],
+              attributes: ['id', 'address', 'fullName', 'docType', 'docNumber'],
             },
           ],
         },
@@ -182,16 +183,7 @@ exports.Post = catchAsync(async (req, res, next) => {
   }
 })
 
-exports.GetById = findOne(Payment, {
-  include: [
-    {
-      model: Contract,
-    },
-    {
-      model: PaymentType,
-    },
-  ],
-})
+exports.GetById = findOne(Payment)
 
 exports.Destroy = catchAsync(async (req, res, next) => {
   const payment = await Payment.findByPk(req.params.id)
@@ -304,18 +296,7 @@ exports.NotPaidCurrentMonthContract = catchAsync(async (req, res, next) => {
       },
     },
     include: [
-      {
-        model: Payment,
-        where: {
-          month: {
-            [Op.eq]: new Date().getMonth() + 1,
-          },
-          year: {
-            [Op.eq]: new Date().getFullYear(),
-          },
-        },
-        required: false,
-      },
+      { model: ContractPrice, limit: 1, order: [['createdAt', 'DESC']] },
       {
         model: Property,
         include: [

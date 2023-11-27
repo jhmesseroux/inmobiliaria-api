@@ -194,7 +194,7 @@ exports.SendReceiptCurrentMonth = catchAsync(async (req, res, next) => {
         },
         include: { model: Person },
       },
-      { model: ContractPrice },
+      { model: ContractPrice, limit: 1, order: [['createdAt', 'DESC']] },
       {
         model: Expense,
         where: {

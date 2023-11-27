@@ -22,8 +22,6 @@ router.use(`${VERSION}/visits`, require('./visit.router'))
 router.use(`${VERSION}/claims`, require('./claim.router'))
 router.use(`${VERSION}/budgets`, require('./budget.router'))
 
-// router.post(`${VERSION}/jobs-debts-clients', ctrlJobs.jobDebtsClients)
-// router.post(`${VERSION}/jobs-debts-owners', ctrlJobs.jobDebtsOwner)
-// router.use(`${VERSION}/notices', require('./notice.router'))
+router.use(`${VERSION}/notices`, require('./notice.router'))
 
 module.exports = router

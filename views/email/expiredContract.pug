@@ -1,8 +1,8 @@
 extends baseEmail
 
 block content
-  p Hola  #{data.fullName}! Notificamos que se adeudan dos (3) meses de alquiler(#{data.month}), recuerden que habiendo una deuda de 3 meses se enviara notificación informativa automática a las garantías . 
-  p Por favor en lo posible trata de regularizarla a la brevedad .
+  p Hola  #{data.fullName}! #{data.TEXT_VEN_CONT} 
+  p.expiredContractdeadLine Vencimiento contrato :  #{data.endDate}
   br
   br
   br
@@ -17,4 +17,3 @@ block content
             tbody
               tr
                 td
-  //- span Enviado el #{new Date()}
