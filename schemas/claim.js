@@ -55,6 +55,16 @@ const Claim = dbConnect.define(
         },
       },
     },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: 'claims',

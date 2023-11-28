@@ -83,4 +83,8 @@ module.exports = class Email {
   async sendNoticeDebtForAssurance() {
     await this.send('noticeForAssurance', 'Notificación a garantías por deuda de alquileres')
   }
+
+  async sendReceiptCurrentMonth() {
+    await this.send('receiptCurrentMonth', this.data.subject)
+  }
 }

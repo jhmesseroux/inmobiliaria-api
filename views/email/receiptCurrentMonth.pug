@@ -1,0 +1,38 @@
+extends baseEmail
+
+block content
+  p Hi #{data.fullName},
+  p Esperemos que te encuentres bien , aca te dejamos el #{data.subject}
+  p 
+    strong GASTOS GENERALES 
+  ul 
+    li #{data.currentMonth} 
+    li #{data.admFees}
+    each item in data.Expenses
+      li $#{item.amount} | #{item.description} #{data.period}
+  p 
+    strong Eventualidades 
+  ul 
+    each item in data.Eventualities
+      li $#{item.clientAmount} | #{item.title} #{data.period}
+  
+  p 
+    strong Total a pagar : 
+    span $#{data.total}
+
+  p Recuerde que ademas de estos gastos en caso de tener deudas pendientes se le sumaran a su proximo recibo con sus correspondientes intereses adicionales.
+
+  p Si tienes alguna duda o consulta, no dudes en contactarnos!
+  p - #{data.organizationName}
+  
+     
+
+  //- table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
+  //-   tbody
+  //-     tr
+  //-       td(align='left')
+  //-         table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+  //-           tbody
+  //-             tr
+  //-               td
+  //-                 a(href=`${data.url}`, target='_blank') Ver detalles

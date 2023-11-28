@@ -6,7 +6,7 @@ router.use(auth.protect)
 
 router.post('/', ctrl.Post)
 router.post('/:id/add-garantes', ctrl.AddGarantes)
-router.post('/job/sendReceiptMpnthly', ctrl.SendReceiptCurrentMonth)
+// router.post('/job/sendReceiptMpnthly', ctrl.SendReceiptCurrentMonth)
 
 router.get('/', ctrl.GetAll)
 router.get('/paginate', ctrl.Paginate)

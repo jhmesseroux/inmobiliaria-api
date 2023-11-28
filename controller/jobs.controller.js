@@ -5,12 +5,16 @@ const Email = require('../helpers/email')
 const Organization = require('../schemas/organization')
 const ContractPerson = require('../schemas/contractPerson')
 const Person = require('../schemas/person')
-const { CONTRACT_ROLES, EXPIRED_CONTRACT_TEXT_KEY, MAIL_MOTIVE, MONTHS_IN_SPANISH } = require('../constants')
+const { CONTRACT_ROLES, EXPIRED_CONTRACT_TEXT_KEY, MAIL_MOTIVE, MONTHS_IN_SPANISH, CONTRACT_STATES } = require('../constants')
 const Contract = require('../schemas/contract')
 const Parameter = require('../schemas/parameter')
 const MailLog = require('../schemas/maillog')
 const Debt = require('../schemas/debt')
 const Property = require('../schemas/property')
+const Eventuality = require('../schemas/eventuality')
+const ContractPrice = require('../schemas/contractPrice')
+const Expense = require('../schemas/expense')
+const Payment = require('../schemas/payment')
 
 exports.noticeExpiringContracts = catchAsync(async (req, res, next) => {
   const contracts = await Contract.findAll({
@@ -244,4 +248,141 @@ exports.noticeDebts = catchAsync(async (req, res, next) => {
   })
 
   // return res.json({ ok: true, results: contracts.length, data: contracts, })
+})
+
+exports.NoticeReceiptCurrentMonth = catchAsync(async (req, res, next) => {
+  // get all contracts with state = 'En curso' and endDate > now and startDate < now
+  const contracts = await Contract.findAll({
+    where: {
+      state: CONTRACT_STATES[1],
+      endDate: { [Op.gt]: new Date() },
+      startDate: { [Op.lt]: new Date() },
+    },
+    attributes: ['id', 'startDate', 'endDate', 'state', 'admFeesPorc'],
+    include: [
+      {
+        model: Organization,
+        attributes: ['id', 'name', 'email'],
+      },
+      {
+        model: Property,
+        attributes: ['id', 'street', 'number', 'floor', 'dept'],
+        include: [
+          { model: Person, attributes: ['fullName', 'docType', 'docNumber'] },
+          {
+            model: Eventuality,
+            where: {
+              clientPaid: null,
+              clientAmount: { [Op.ne]: 0 },
+            },
+            required: false,
+          },
+        ],
+      },
+      {
+        model: ContractPerson,
+        where: {
+          role: CONTRACT_ROLES[0],
+        },
+        attributes: ['role'],
+        include: { model: Person, attributes: ['id', 'fullName', 'email', 'docType', 'docNumber'] },
+      },
+      { model: ContractPrice, limit: 1, attributes: ['amount'], order: [['createdAt', 'DESC']] },
+      {
+        model: Expense,
+        where: {
+          isOwner: false,
+        },
+        required: false,
+      },
+      // {
+      //   model: Debt,
+      //   where: {
+      //     isOwner: false,
+      //     paidDate: null,
+      //     paid: 0,
+      //     amount: { [Op.ne]: 0 },
+      //   },
+      //   required: false,
+      // },
+      {
+        model: Eventuality,
+        where: {
+          clientPaid: null,
+          clientAmount: { [Op.ne]: 0 },
+        },
+        required: false,
+      },
+    ],
+  })
+
+  // VALIDATE IF EACH CONTRACT HAS ALREADY PAID THE CURRENT MONTH
+  const contractsToSend = []
+  for (let i = 0; i < contracts.length; i++) {
+    const payments = await Payment.findAll({
+      where: {
+        ContractId: contracts[i].id,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      },
+    })
+    if (payments.length <= 0) contractsToSend.push(contracts[i])
+  }
+
+  // SEND EMAIL TO EACH CONTRACT
+  for (let i = 1; i < contractsToSend.length; i++) {
+    const contract = contractsToSend[i]
+    const { Property, ContractPeople, ContractPrices, Eventualities: eventsCont, Expenses } = contract
+    const { Person: Client } = ContractPeople[0]
+    const { Eventualities: eventsOwners } = Property
+    const { amount } = ContractPrices[0]
+    const { street, number, floor, dept } = Property
+
+    const allEvents = [...eventsCont, ...eventsOwners]
+    const period = MONTHS_IN_SPANISH[new Date().getMonth()] + ' ' + new Date().getFullYear()
+    const subject = `Recibo de alquiler ${street} ${number} ${floor} ${dept} del periodo ${period} `
+    const totalExpenses = Expenses.reduce((a, b) => a + b.amount, 0)
+    // const totalDebts = Debts.reduce((a, b) => a + b.amount, 0)
+    const totalEventualities = allEvents.reduce((a, b) => a + b.clientAmount, 0)
+    const fessAmount = (amount * contract.admFeesPorc) / 100
+    const admFees = '$' + fessAmount + ' |  GASTOS DE GESTION ' + period
+    const property = street + ' ' + number + ' ' + floor + '-' + dept
+    const total = amount + totalExpenses + totalEventualities + fessAmount
+    const currentMonth = '$' + amount + '| ALQUILER ' + property + ' ' + period
+
+    // const p = await Payment.create({
+    //   month: new Date().getMonth() + 1,
+    //   year: new Date().getFullYear(),
+    //   amount,
+    //   ContractId: contract.id,
+    // })
+
+    await new Email({
+      subject,
+      fullName: Client.fullName,
+      email: Client.email,
+      // property,
+      organizationName: contract.Organization.name,
+      organizationEmail: contract.Organization.email,
+      currentMonth,
+      // amount,
+      period,
+      Eventualities: allEvents,
+      // Debts,
+      admFees,
+      Expenses,
+      // totalExpenses,
+      // totalDebts,
+      total,
+    }).sendReceiptCurrentMonth()
+  }
+
+  return res.json({
+    ok: true,
+    l1: contracts.length,
+    l2: contractsToSend.length,
+    status: 'success',
+    message: 'Se enviaron los recibos correctamente',
+    contractsToSend,
+  })
 })

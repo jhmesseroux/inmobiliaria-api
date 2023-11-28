@@ -164,115 +164,6 @@ exports.GetOwnerContracts = catchAsync(async (req, res, next) => {
   })
 })
 
-exports.SendReceiptCurrentMonth = catchAsync(async (req, res, next) => {
-  // get all contracts with state = 'En curso' and endDate > now and startDate < now
-  const contracts = await Contract.findAll({
-    where: {
-      state: CONTRACT_STATES[1],
-      endDate: { [Op.gt]: new Date() },
-      startDate: { [Op.lt]: new Date() },
-    },
-    include: [
-      {
-        model: Property,
-        include: [
-          { model: Person },
-          {
-            model: Eventuality,
-            where: {
-              clientPaid: null,
-              clientAmount: { [Op.ne]: 0 },
-            },
-            required: false,
-          },
-        ],
-      },
-      {
-        model: ContractPerson,
-        where: {
-          role: CONTRACT_ROLES[0],
-        },
-        include: { model: Person },
-      },
-      { model: ContractPrice, limit: 1, order: [['createdAt', 'DESC']] },
-      {
-        model: Expense,
-        where: {
-          isOwner: false,
-        },
-        required: false,
-      },
-      {
-        model: Debt,
-        where: {
-          isOwner: false,
-          paidDate: null,
-          paid: 0,
-          amount: { [Op.ne]: 0 },
-        },
-        required: false,
-      },
-      {
-        model: Eventuality,
-        where: {
-          clientPaid: null,
-          clientAmount: { [Op.ne]: 0 },
-        },
-        required: false,
-      },
-    ],
-  })
-
-  // VALIDATE IF EACH CONTRACT HAS ALREADY PAID THE CURRENT MONTH
-  const contractsToSend = []
-  for (let i = 0; i < contracts.length; i++) {
-    const payments = await Payment.findAll({
-      where: {
-        ContractId: contracts[i].id,
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
-      },
-    })
-    if (payments.length <= 0) contractsToSend.push(contracts[i])
-  }
-
-  // SEND EMAIL TO EACH CONTRACT
-  // for (let i = 0; i < contractsToSend.length; i++) {
-  //   const contract = contractsToSend[i]
-  //   const { Property, ContractPeople, ContractPrices } = contract
-  //   const { Person: Client } = ContractPeople.find((cp) => cp.role === CONTRACT_ROLES[0])
-  //   const { Person: Owner } = Property
-  //   const { amount } = ContractPrices[0]
-  //   const { street, number, floor, dept } = Property
-  //   const { fullName } = Client
-  //   const { email } = Owner
-
-  //   const subject = `Recibo de alquiler ${street} ${number} ${floor} ${dept}`
-  //   const html = `
-  //     <h3>Estimado ${fullName}</h3>
-  //     <p>Le adjuntamos el recibo de alquiler correspondiente al mes de ${new Date().toLocaleString('es-ES', { month: 'long' })} ${new Date().getFullYear()}</p>
-  //     <p>El monto a pagar es de $${amount}</p>
-  //     <p>Saludos</p>
-  //   `
-  //   const attachments = [
-  //     {
-  //       filename: 'recibo.pdf',
-  //       path: 'http://localhost:3000/api/contract/pdf/' + contract.id,
-  //       contentType: 'application/pdf',
-  //     },
-  //   ]
-  //   await sendEmail(email, subject, html, attachments)
-  // }
-
-  return res.json({
-    ok: true,
-    status: 'success',
-    message: 'Se enviaron los recibos correctamente',
-    contractsToSend,
-    contracts,
-  })
-})
-
 exports.GetById = findOne(Contract, {
   include: [
     // {
@@ -298,6 +189,7 @@ exports.GetById = findOne(Contract, {
 
 exports.Destroy = catchAsync(async (req, res, next) => {
   const id = req.params.id
+  console.log(req.body)
 
   const contract = await Contract.findOne({ where: { id } })
   if (!contract) return next(new AppError('No se encontró el contrato', 400))
@@ -332,60 +224,56 @@ exports.Destroy = catchAsync(async (req, res, next) => {
 
   // if (eventsOwners.length > 0) return next(new AppError("El propietario tiene eventualidades sin pagar/cobrar,no se puede eliminar el contrato.", 400))
 
-  await dbConnect.transaction(async (t) => {
-    await Property.update(
-      { state: 'Libre' },
-      {
-        where: { id: contract.PropertyId },
-        transaction: t,
-      }
-    )
+  // await dbConnect.transaction(async (t) => {
+  //   await Property.update(
+  //     { state: 'Libre' },
+  //     {
+  //       where: { id: contract.PropertyId },
+  //       transaction: t,
+  //     }
+  //   )
 
-    await Contract.update({ state: 'Finalizado' }, { where: { id }, transaction: t })
-    await Contract.destroy({ where: { id }, transaction: t })
-    return res.json({
-      ok: true,
-      status: 'success',
-      message: 'El registro fue eliminado con exito',
-    })
-  })
+  //   await Contract.update({ state: 'Finalizado' }, { where: { id }, transaction: t })
+  //   await Contract.destroy({ where: { id }, transaction: t })
+  //   return res.json({
+  //     ok: true,
+  //     status: 'success',
+  //     message: 'El registro fue eliminado con exito',
+  //   })
+  // })
 })
 
-// TODO: terminar
 exports.finish = catchAsync(async (req, res, next) => {
   const id = req.params.id
 
   const contract = await Contract.findOne({ where: { id } })
   if (!contract) return next(new AppError('No se encontró el contrato', 400))
 
-  // const debts = await DebtClient.findAll({ where: { ContractId: id, paid: false } })
-  // if (debts.length > 0) return next(new AppError('El inquilino tiene deudas pendientes,no se puede finalizar el contrato.', 400))
+  const debts = await Debt.findAll({ where: { ContractId: id, paid: false } })
+  if (debts.length > 0) return next(new AppError('No se puede finalizar el contrato porque tiene deudas sin pagar y/o cobrar.', 400))
 
-  // // const payments = await DebtOwner.findAll({ where: { ContractId: id, paid: false } },)
-  // // if (payments.length > 0) return next(new AppError("El propietario tiene pagos pendientes,no se puede finalizar el contrato.", 400))
+  const events = await Eventuality.findAll({
+    where: {
+      ContractId: id,
+      [Op.or]: [{ clientAmount: { [Op.ne]: 0 } }, { ownerAmount: { [Op.ne]: 0 } }],
+      [Op.or]: [{ clientPaid: null }, { ownerPaid: null }],
+    },
+  })
 
-  // const events = await Eventuality.findAll(
-  //   {
-  //     where: {
-  //       PropertyId: contract.PropertyId,
-  //       clientAmount: { [Op.ne]: 0 },
-  //       clientPaid: false
-  //     }
-  //   }
-  // )
+  if (events.length > 0) return next(new AppError('No se puede finalizar el contrato porque  tiene eventualidades sin pagar/cobrar.', 400))
 
-  // if (events.length > 0) return next(new AppError('El inquilino tiene eventualidades sin pagar/cobrar,no se puede finalizar el contrato.', 400))
+  const eventsProperty = await Eventuality.findAll({
+    where: {
+      PropertyId: contract.PropertyId,
+      [Op.or]: [{ clientAmount: { [Op.ne]: 0 } }, { ownerAmount: { [Op.ne]: 0 } }],
+      [Op.or]: [{ clientPaid: null }, { ownerPaid: null }],
+    },
+  })
 
-  // const eventsOwners = await Eventuality.findAll(
-  //   {
-  //     where: {
-  //       PropertyId: contract.PropertyId,
-  //       ownerAmount: { [Op.ne]: 0 },
-  //       ownerPaid: false,
-  //     },
-  //   },
-  // )
-  // if (eventsOwners.length > 0) return next(new AppError("El propietario tiene eventualidades sin pagar/cobrar,no se puede finalizar el contrato.", 400))
+  if (eventsProperty.length > 0)
+    return next(
+      new AppError('No se puede finalizar el contrato porque  tiene eventualidades sin pagar/cobrar relacionado con la propiedad.', 400)
+    )
 
   await dbConnect.transaction(async (t) => {
     await Property.update(
@@ -396,7 +284,8 @@ exports.finish = catchAsync(async (req, res, next) => {
       }
     )
 
-    await Contract.update({ state: 'Finalizado', motive: req.body.motive }, { where: { id }, transaction: t })
+    await Contract.update({ state: CONTRACT_STATES[2], motive: req.body.motive }, { where: { id }, transaction: t })
+
     return res.json({
       ok: true,
       status: 'success',
