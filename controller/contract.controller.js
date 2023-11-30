@@ -1,5 +1,5 @@
 const { Op } = require('sequelize')
-const { all, paginate, findOne, update, create } = require('../generic/factoryControllers')
+const { all, paginate, findOne, update, create, destroy } = require('../generic/factoryControllers')
 const AppError = require('../helpers/AppError')
 const { catchAsync } = require('../helpers/catchAsync')
 const Property = require('../schemas/property')
@@ -23,8 +23,8 @@ const include = {
     },
     {
       model: ContractPerson,
-      include: { model: Person, attributes: ['fullName', 'docType', 'docNumber'] },
-      where: { role: CONTRACT_ROLES[0] },
+      include: { model: Person, attributes: ['fullName', 'docType', 'docNumber', 'email'] },
+      // where: { role: CONTRACT_ROLES[0] },
     },
     { model: ContractPrice, limit: 1, order: [['createdAt', 'DESC']] },
   ],
@@ -101,9 +101,12 @@ exports.Post = catchAsync(async (req, res, next) => {
 exports.Put = update(Contract, ['startDate', 'endDate', 'deposit', 'booking', 'description', 'admFeesPorc', 'comission'])
 
 exports.AddPrice = create(ContractPrice)
+exports.DeleteGarante = destroy(ContractPerson)
 
 exports.AddGarantes = catchAsync(async (req, res, next) => {
   const { ContractId, assurances } = req.body
+  console.log({ ContractId })
+
   if (!assurances || assurances.length <= 0) return next(new AppError('No se envió ningún garante', 400))
   await dbConnect.transaction(async (t) => {
     // eslint-disable-next-line semi-spacing

@@ -15,6 +15,32 @@ const Eventuality = require('../schemas/eventuality')
 const ContractPrice = require('../schemas/contractPrice')
 const Expense = require('../schemas/expense')
 const Payment = require('../schemas/payment')
+const { all, paginate } = require('../generic/factoryControllers')
+
+exports.GetAll = all(MailLog, {
+  include: [
+    {
+      model: Organization,
+      attributes: ['id', 'name'],
+    },
+    {
+      model: Person,
+      attributes: ['id', 'fullName', 'email'],
+    },
+  ],
+})
+exports.Paginate = paginate(MailLog, {
+  include: [
+    {
+      model: Organization,
+      attributes: ['id', 'name'],
+    },
+    {
+      model: Person,
+      attributes: ['id', 'fullName', 'email'],
+    },
+  ],
+})
 
 exports.noticeExpiringContracts = catchAsync(async (req, res, next) => {
   const contracts = await Contract.findAll({

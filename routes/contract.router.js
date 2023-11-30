@@ -18,6 +18,7 @@ router.put('/:id/finish', ctrl.finish)
 router.put('/:id/add-price', ctrl.AddPrice)
 
 router.delete('/:id', ctrl.Destroy)
+router.delete('/:id/delete-garante', ctrl.DeleteGarante)
 // router.get('/expired-contracts/:days', ctrl.ExpiredContracts)
 
 // router.get('/debts/client/all', ctrl.DebtsClients)
