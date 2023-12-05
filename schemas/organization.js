@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize')
 const { dbConnect } = require('../db/index')
+const Plan = require('./plan')
 const Organization = dbConnect.define(
   'Organization',
   {
@@ -8,6 +9,18 @@ const Organization = dbConnect.define(
       allowNull: false,
       type: DataTypes.BIGINT,
       autoIncrement: true,
+    },
+    PlanId: {
+      allowNull: false,
+      type: DataTypes.BIGINT,
+      validate: {
+        notNull: {
+          msg: 'El plan es obligatorio.',
+        },
+        notEmpty: {
+          msg: 'El plan es obligatorio.',
+        },
+      },
     },
     name: {
       type: DataTypes.STRING(50),
@@ -93,5 +106,8 @@ const Organization = dbConnect.define(
     tableName: 'organizations',
   }
 )
+
+Organization.belongsTo(Plan, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' })
+Plan.hasMany(Organization)
 
 module.exports = Organization

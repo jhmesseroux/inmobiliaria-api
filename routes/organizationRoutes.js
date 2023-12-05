@@ -11,7 +11,7 @@ const auth = require('../controller/authController')
 router.use(auth.protect, auth.restrictTo('admin'))
 
 router.get('/', ctrl.GetAll)
-// router.get('/:id', ctrl.GetById)
+router.get('/:id', ctrl.GetById)
 
 // router.post('/', ctrl.SignUp);
 

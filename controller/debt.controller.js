@@ -198,7 +198,7 @@ exports.jobDebtsOwners = catchAsync(async (req, res, next) => {
 
   // console.log(owners)
 
-  if (1 + 1 == 2) return res.json({ ok: true, owners, message: 'No hay propietarios.' })
+  // if (1 + 1 == 2) return res.json({ ok: true, owners, message: 'No hay propietarios.' })
 
   const transact = await dbConnect.transaction()
   try {
@@ -233,7 +233,9 @@ exports.jobDebtsOwners = catchAsync(async (req, res, next) => {
           pmtContr.forEach((p) => prevExps.push(...p.expenseDetails))
 
           const exist = await Debt.findOne({ where: { year, month, ContractId: docs2[k].id, isOwner: true } })
+          console.log(docs2[k].ContractPrices)
           const currentContractPrice = docs2[k].ContractPrices.sort((a, b) => a.id - b.id)[docs2[k].ContractPrices.length - 1].amount
+          console.log(currentContractPrice)
 
           if (!exist) {
             let textRent =
@@ -277,7 +279,7 @@ exports.jobDebtsOwners = catchAsync(async (req, res, next) => {
               await Debt.create(
                 {
                   description: textFees,
-                  amount: -currentContractPrice * (docs2[k].commision / 100),
+                  amount: -currentContractPrice * (docs2[k].comission / 100),
                   // amount: -currentContractPrice * (9 / 100),
                   year,
                   month,
@@ -338,6 +340,7 @@ exports.jobDebtsOwners = catchAsync(async (req, res, next) => {
     await transact.commit()
     return res.json({ ok: true, message: 'DEBTS OWNER JOB DONE SUCCESSFULLY.' })
   } catch (error) {
+    console.log(error)
     // await JobLog.create({ type: 'debts', state: 'fail', message: error.message || 'Something went wrong.' })
     await transact.rollback()
     await DebtLog.create({
@@ -349,7 +352,7 @@ exports.jobDebtsOwners = catchAsync(async (req, res, next) => {
     })
     next(
       new AppError(
-        error.errors.map((e) => e.message),
+        error.errors?.map((e) => e.message),
         500
       )
     )

@@ -146,7 +146,7 @@ exports.GetOwnerContracts = catchAsync(async (req, res, next) => {
       startDate: { [Op.lte]: new Date() },
       // endDate: { [Op.gt]: new Date() }, // no va porque aveces el contrato finaliza pero el inquilino sigue viviendo o el adm no lo finaliza por x motivo
     },
-    attributes: ['id', 'startDate', 'endDate', 'state', 'PropertyId', 'admFeesPorc'],
+    attributes: ['id', 'startDate', 'endDate', 'state', 'PropertyId', 'admFeesPorc', 'comission'],
     include: [
       { model: ContractPrice, attributes: ['id', 'amount'] },
       { model: Property, attributes: ['id', 'street', 'number', 'floor', 'dept'] },

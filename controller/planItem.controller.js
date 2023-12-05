@@ -1,0 +1,11 @@
+const { all, paginate, create, findOne, update, destroy, destroyMultiple, restore } = require('../generic/factoryControllers')
+const PlanItem = require('../schemas/planItem')
+
+exports.GetAll = all(PlanItem)
+exports.Paginate = paginate(PlanItem)
+exports.Create = create(PlanItem)
+exports.GetById = findOne(PlanItem)
+exports.Put = update(PlanItem)
+exports.Destroy = destroy(PlanItem)
+exports.DestroyMultiple = destroyMultiple(PlanItem)
+exports.Restore = restore(PlanItem)

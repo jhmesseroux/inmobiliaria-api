@@ -36,7 +36,7 @@ const include = {
           include: [
             {
               model: Person,
-              attributes: ['id', 'address', 'fullName', 'docType', 'docNumber'],
+              attributes: ['id', 'address', 'fullName', 'docType', 'docNumber', 'email'],
             },
           ],
         },
@@ -48,7 +48,7 @@ const include = {
     },
     {
       model: Person,
-      attributes: ['id', 'address', 'fullName'],
+      attributes: ['id', 'address', 'fullName', 'email'],
     },
   ],
 }
@@ -109,7 +109,7 @@ exports.Post = catchAsync(async (req, res, next) => {
             }
           )
         }
-        if (req.body.PersonId !== null && req.body.PersonId !== undefined) {
+        if (req.body.ContractId !== null && req.body.ContractId !== undefined) {
           if (req.body.expenseDetails[j].hasOwnProperty('paidCurrentMonth')) {
             paidCurMonth = true
           }

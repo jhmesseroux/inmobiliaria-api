@@ -2,10 +2,9 @@ const { DataTypes } = require('sequelize')
 const { dbConnect } = require('../db/index')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
-const Organization = require('./organization')
 
-const Account = dbConnect.define(
-  'Account',
+const Administrador = dbConnect.define(
+  'Administrador',
   {
     id: {
       primaryKey: true,
@@ -32,10 +31,9 @@ const Account = dbConnect.define(
     role: {
       allowNull: false,
       type: DataTypes.STRING(12),
-      defaultValue: 'admin',
       validate: {
         isIn: {
-          args: [['admin', 'superAdmin', 'collaborator']],
+          args: [['superAdmin', 'manager', 'collaborator']],
           msg: 'Ese rol no está permitido en el sistema.',
         },
         notNull: {
@@ -51,7 +49,7 @@ const Account = dbConnect.define(
       allowNull: false,
       type: DataTypes.STRING(70),
       unique: {
-        name: 'email_organization_id_account_unique',
+        name: 'email_id_account_unique',
         msg: 'Ya existe otra cuenta con ese correo.',
       },
       validate: {
@@ -66,22 +64,6 @@ const Account = dbConnect.define(
         },
       },
     },
-    OrganizationId: {
-      allowNull: false,
-      type: DataTypes.BIGINT,
-      unique: {
-        name: 'email_organization_id_account_unique',
-        msg: 'Ya existe otra cuenta con ese correo.',
-      },
-      validate: {
-        notNull: {
-          msg: 'La organización es obligatoria.',
-        },
-        notEmpty: {
-          msg: 'La organización es obligatoria.',
-        },
-      },
-    },
     password: {
       allowNull: false,
       type: DataTypes.STRING,
@@ -93,7 +75,7 @@ const Account = dbConnect.define(
           msg: 'La contraseña no puede ser vacia.',
         },
         len: {
-          args: [3, 255],
+          args: [3, 50],
           msg: 'La contraseña debe tener entre 3 a 50 caracteres.',
         },
       },
@@ -104,28 +86,22 @@ const Account = dbConnect.define(
     passwordResetExpires: DataTypes.DATE,
   },
   {
-    tableName: 'accounts',
+    tableName: 'administrators',
   }
 )
 
-Account.belongsTo(Organization, {
-  foreignKey: { allowNull: false },
-  onDelete: 'CASCADE',
-})
-Organization.hasMany(Account)
-
-Account.beforeCreate(async (user, options) => {
+Administrador.beforeCreate(async (user, options) => {
   user.password = await bcrypt.hash(user.password, 12)
 })
 
-Account.prototype.checkPassword = async function (userPassword, hash) {
+Administrador.prototype.checkPassword = async function (userPassword, hash) {
   return await bcrypt.compare(userPassword, hash)
 }
-Account.prototype.hashPassword = async function (password) {
+Administrador.prototype.hashPassword = async function (password) {
   return await bcrypt.hash(password, 12)
 }
 
-Account.prototype.changePasswordAfter = function (jwtIat) {
+Administrador.prototype.changePasswordAfter = function (jwtIat) {
   if (this.passwordChangedAt) {
     const changePassword = parseInt(this.passwordChangedAt.getTime() / 1000, 10)
     return jwtIat < changePassword
@@ -133,7 +109,7 @@ Account.prototype.changePasswordAfter = function (jwtIat) {
   return false
 }
 
-Account.prototype.createPasswordResetToken = function () {
+Administrador.prototype.createPasswordResetToken = function () {
   // create token
   const resetToken = crypto.randomBytes(32).toString('hex')
   // encrypt the token and save to the database
@@ -145,4 +121,4 @@ Account.prototype.createPasswordResetToken = function () {
   return resetToken
 }
 
-module.exports = Account
+module.exports = Administrador
