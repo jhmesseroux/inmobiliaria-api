@@ -9,7 +9,6 @@ const allowedFields = ['type', 'description', 'category', 'photo', 'approved', '
 exports.uploadPhoto = catchAsync(async (req, res, next) => {
   if (!req.body.photo || req.body.photo === null || req.body?.photo.length < 300) return next()
   const imagePath = req.body.photo
-  // console.log(imagePath)
   const options = { use_filename: true, unique_filename: false, overwrite: true, format: 'png' }
   try {
     const result = await cloudinary.uploader.upload(imagePath, {

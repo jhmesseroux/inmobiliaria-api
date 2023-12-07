@@ -17,9 +17,7 @@ const createToken = (user) => {
 }
 const createSendToken = async (data, statusCode, res) => {
   data.password = undefined
-  // console.log('data :: ',data)
   const token = createToken({ ...data })
-
   return res.status(statusCode).json({
     status: 'success',
     ok: true,
@@ -229,7 +227,6 @@ exports.ForgotPassword = catchAsync(async (req, res, next) => {
 })
 
 exports.ResetPassword = catchAsync(async (req, res, next) => {
-  console.log('hello')
   // Get Uer based on the token
   if (!req.params.token) return next(new AppError('Token inválido o caducado.', 404))
   const hashToken = crypto.createHash('sha256').update(req.params.token).digest('hex')

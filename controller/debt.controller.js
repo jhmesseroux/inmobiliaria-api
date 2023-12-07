@@ -25,15 +25,11 @@ exports.jobDebtsClients = catchAsync(async (req, res, next) => {
   const year = new Date().getFullYear()
   // previos month and current year
   const mothYearText = MONTHS_IN_SPANISH[month - 1] + '/' + year
-  console.log(mothYearText, month, year)
   const d = new Date()
-  console.log(d)
   d.setDate(d.getDate() + 3)
 
   // Get last date from last month
   const lastDateFromLastMonth = new Date(year, month - 1, new Date(year, month, 0).getDate())
-
-  console.log(d)
 
   // if (!d) {
   //   return res.json({ ok: true, results: 0, data: [] })

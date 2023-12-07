@@ -105,8 +105,6 @@ exports.DeleteGarante = destroy(ContractPerson)
 
 exports.AddGarantes = catchAsync(async (req, res, next) => {
   const { ContractId, assurances } = req.body
-  console.log({ ContractId })
-
   if (!assurances || assurances.length <= 0) return next(new AppError('No se envió ningún garante', 400))
   await dbConnect.transaction(async (t) => {
     // eslint-disable-next-line semi-spacing
