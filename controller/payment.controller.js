@@ -48,7 +48,7 @@ const include = {
     },
     {
       model: Person,
-      attributes: ['id', 'address', 'fullName', 'email'],
+      attributes: ['id', 'address', 'fullName', 'docType', 'docNumber', 'email'],
     },
   ],
 }

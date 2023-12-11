@@ -256,25 +256,48 @@ exports.finish = catchAsync(async (req, res, next) => {
   const events = await Eventuality.findAll({
     where: {
       ContractId: id,
-      [Op.or]: [{ clientAmount: { [Op.ne]: 0 } }, { ownerAmount: { [Op.ne]: 0 } }],
-      [Op.or]: [{ clientPaid: null }, { ownerPaid: null }],
+      [Op.or]: [
+        {
+          [Op.and]: {
+            clientAmount: { [Op.ne]: 0 },
+            clientPaid: null,
+          },
+        },
+        {
+          [Op.and]: {
+            ownerAmount: { [Op.ne]: 0 },
+            ownerPaid: null,
+          },
+        },
+      ],
     },
   })
 
-  if (events.length > 0) return next(new AppError('No se puede finalizar el contrato porque  tiene eventualidades sin pagar/cobrar.', 400))
+  if (events.length > 0)
+    return next(new AppError('No se puede finalizar el contrato porque  tiene eventualidades sin pagar/cobrar....', 400))
 
   const eventsProperty = await Eventuality.findAll({
     where: {
       PropertyId: contract.PropertyId,
-      [Op.or]: [{ clientAmount: { [Op.ne]: 0 } }, { ownerAmount: { [Op.ne]: 0 } }],
-      [Op.or]: [{ clientPaid: null }, { ownerPaid: null }],
+      [Op.or]: [
+        {
+          [Op.and]: {
+            clientAmount: { [Op.ne]: 0 },
+            clientPaid: null,
+          },
+        },
+        {
+          [Op.and]: {
+            ownerAmount: { [Op.ne]: 0 },
+            ownerPaid: null,
+          },
+        },
+      ],
     },
   })
 
   if (eventsProperty.length > 0)
-    return next(
-      new AppError('No se puede finalizar el contrato porque  tiene eventualidades sin pagar/cobrar relacionado con la propiedad.', 400)
-    )
+    return next(new AppError('No se puede finalizar el contrato porque  la propiedad tiene eventualidades sin pagar/cobrar.', 400))
 
   await dbConnect.transaction(async (t) => {
     await Property.update(
